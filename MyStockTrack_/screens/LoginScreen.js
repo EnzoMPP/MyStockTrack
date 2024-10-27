@@ -1,15 +1,38 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleLogin = () => {
-    //Temporário Login
+  const handleLogin = async () => {
     if (email && password) {
-      Alert.alert('Login bem-sucedido!', `Bem-vindo!`);
-      navigation.navigate('AppTabs');
+      try {
+        const response = await fetch('https://1d2a-2804-14c-fc81-94aa-2847-ab19-def8-c887.ngrok-free.app/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ email, password }),
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          const token = data.token;
+
+          // Armazena o token no AsyncStorage
+          await AsyncStorage.setItem('userToken', token);
+
+          Alert.alert('Login bem-sucedido!', `Bem-vindo!`);
+          navigation.navigate('AppTabs'); 
+        } else {
+          const errorData = await response.json();
+          Alert.alert('Erro no login', errorData.message || 'Falha na autenticação.');
+        }
+      } catch (error) {
+        Alert.alert('Erro', 'Não foi possível conectar ao servidor.');
+      }
     } else {
       Alert.alert('Erro no login', 'Por favor, preencha todos os campos.');
     }

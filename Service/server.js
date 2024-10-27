@@ -1,22 +1,24 @@
-// server.js
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const cors = require('cors');
 
 const app = express();
 const port = 3000;
 
 // Middleware
+app.use(cors());
 app.use(bodyParser.json());
 
 // Conectar ao MongoDB
-mongoose.connect('mongodb://localhost:27017/MyStockTrack');
+mongoose.connect('mongodb://localhost:27017/MyStockTrack').catch(err => console.error('Erro ao conectar ao MongoDB:', err));
 
-// Modelo de Usuário
+// Modelo de users
 const userSchema = new mongoose.Schema({
   name: { type: String, required: true },
+  cpf: { type: String, required: true, unique: true },
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   address: { type: String, required: true },
@@ -30,18 +32,29 @@ const User = mongoose.model('User', userSchema);
 
 // Rota de Signup
 app.post('/signup', async (req, res) => {
-  const { name, email, password, address, phone, birthDate, gender, cep } = req.body;
-
-  // Hash da senha
-  const hashedPassword = await bcrypt.hash(password, 10);
-
-  const newUser = new User({ name, email, password: hashedPassword, address, phone, birthDate, gender, cep });
+  const { name, cpf, email, password, address, phone, birthDate, gender, cep } = req.body;
 
   try {
+    const existingCpfUser = await User.findOne({ cpf });
+    if (existingCpfUser) {
+      return res.status(400).json({ error: 'CPF já está em uso.' });
+    }
+
+    const existingEmailUser = await User.findOne({ email });
+    if (existingEmailUser) {
+      return res.status(400).json({ error: 'E-mail já está em uso.' });
+    }
+
+    // Hash da senha
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const newUser = new User({ name, cpf, email, password: hashedPassword, address, phone, birthDate, gender, cep });
     await newUser.save();
-    res.status(201).send('Usuário cadastrado com sucesso!');
+    
+    res.status(201).json({ message: 'Usuário cadastrado com sucesso!' });
   } catch (error) {
-    res.status(400).send('Erro ao cadastrar usuário.');
+    console.error('Erro ao cadastrar usuário:', error.message);
+    res.status(400).json({ error: 'Erro ao cadastrar usuário.' });
   }
 });
 
@@ -52,18 +65,17 @@ app.post('/login', async (req, res) => {
   const user = await User.findOne({ email });
 
   if (!user) {
-    return res.status(400).send('Usuário não encontrado.');
+    return res.status(400).json({ error: 'Usuário não encontrado.' });
   }
 
   const isPasswordValid = await bcrypt.compare(password, user.password);
 
   if (!isPasswordValid) {
-    return res.status(400).send('Senha incorreta.');
+    return res.status(400).json({ error: 'Senha incorreta.' });
   }
 
   const token = jwt.sign({ userId: user._id }, 'secret_key', { expiresIn: '1h' });
-
-  res.send({ token });
+  res.json({ token });
 });
 
 // Iniciar o servidor
