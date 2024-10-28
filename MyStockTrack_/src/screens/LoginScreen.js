@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
+import { View, Text, TextInput, Button, StyleSheet, Alert,Image } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function LoginScreen({ navigation }) {
@@ -9,7 +9,7 @@ export default function LoginScreen({ navigation }) {
   const handleLogin = async () => {
     if (email && password) {
       try {
-        const response = await fetch('https://1d2a-2804-14c-fc81-94aa-2847-ab19-def8-c887.ngrok-free.app/login', {
+        const response = await fetch('https://472f-2804-14c-fc81-94aa-2847-ab19-def8-c887.ngrok-free.app/login', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -40,7 +40,7 @@ export default function LoginScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Tela de Login</Text>
+      <Image source={require('../../assets/images/logo.png')} style={styles.logo} />
       <TextInput
         style={styles.input}
         placeholder="E-mail"
@@ -86,5 +86,11 @@ const styles = StyleSheet.create({
     color: 'blue',
     textAlign: 'center',
     textDecorationLine: 'underline',
+  },
+  logo: {
+    width: 150,
+    height: 150,
+    alignSelf: 'center',
+    marginBottom: 50,
   },
 });
