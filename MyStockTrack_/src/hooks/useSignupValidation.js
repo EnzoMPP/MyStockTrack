@@ -1,8 +1,11 @@
 import { Alert } from 'react-native';
 import { useEmailValidation } from './useEmailValidation';
+import { usePhoneValidation } from './usePhoneValidation';
+
 
 export const useSignupValidation = () => {
   const { validateEmail } = useEmailValidation();
+  const { validatePhone } = usePhoneValidation();
 
   const validateSignup = async (fields) => {
     const { name, cpf, email, password, address, houseNumber, phone, birthDate, gender, cep } = fields;
@@ -51,6 +54,12 @@ export const useSignupValidation = () => {
     const isEmailValid = await validateEmail(email);
     if (!isEmailValid) {
       Alert.alert('Erro no cadastro', 'Por favor, insira um e-mail válido.');
+      return false;
+    }
+
+    const isPhoneValid = await validatePhone(phone);
+    if (!isPhoneValid) {
+      Alert.alert('Erro no cadastro', 'Por favor, insira um telefone válido.');
       return false;
     }
 

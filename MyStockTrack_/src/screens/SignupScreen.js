@@ -50,19 +50,7 @@ export default function SignupScreen({ navigation }) {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          name,
-          cpf,
-          email,
-          password,
-          address,
-          houseNumber,
-          complement,
-          phone,
-          birthDate,
-          gender,
-          cep,
-        }),
+        body: JSON.stringify(validatedData),
       });
 
       const responseText = await response.text();
