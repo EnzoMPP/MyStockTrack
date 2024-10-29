@@ -45,12 +45,24 @@ export default function SignupScreen({ navigation }) {
     if (!validatedData) return;
 
     try {
-      const response = await fetch('https://06a0-2804-14c-fc81-94aa-2847-ab19-def8-c887.ngrok-free.app/signup', {
+      const response = await fetch('https://ba27-2804-14c-fc81-94aa-847f-6da4-e5e5-aebc.ngrok-free.app/signup', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(validatedData),
+        body: JSON.stringify({
+          name,
+          cpf,
+          email,
+          password,
+          address,
+          houseNumber,
+          complement,
+          phone,
+          birthDate,
+          gender,
+          cep,
+        }),
       });
 
       const responseText = await response.text();

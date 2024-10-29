@@ -1,6 +1,5 @@
 import { Alert } from 'react-native';
 import { useEmailValidation } from './useEmailValidation';
-import { formatBirthDate, formatCep, formatPhone, formatCpf } from '../utils/formatters';
 
 export const useSignupValidation = () => {
   const { validateEmail } = useEmailValidation();

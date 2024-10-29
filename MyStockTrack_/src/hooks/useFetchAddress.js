@@ -5,7 +5,7 @@ export const useFetchAddress = () => {
   const [address, setAddress] = useState('');
 
   const fetchAddress = async (cep) => {
-    console.log(`Fetching address for CEP: ${cep}`);
+    // console.log(`Fetching address for CEP: ${cep}`);
     try {
       const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
       const data = await response.json();
@@ -13,7 +13,7 @@ export const useFetchAddress = () => {
         Alert.alert('Erro', 'CEP não encontrado.');
         return;
       }
-      console.log(`Address fetched: ${data.logradouro}, ${data.bairro}, ${data.localidade} - ${data.uf}`);
+      // console.log(`Address fetched: ${data.logradouro}, ${data.bairro}, ${data.localidade} - ${data.uf}`);
       setAddress(`${data.logradouro}, ${data.bairro}, ${data.localidade} - ${data.uf}`);
     } catch (error) {
       console.error('Erro ao buscar o endereço:', error.message);
