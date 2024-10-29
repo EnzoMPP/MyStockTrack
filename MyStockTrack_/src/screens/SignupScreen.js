@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, Button, StyleSheet, Alert, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import CustomInput from '../components/CustomInput';
-import { formatBirthDate, formatCep, formatPhone, formatCpf } from '../utils/formatters';
-import { useEmailValidation } from '../hooks/useEmailValidation';
 import { useFetchAddress } from '../hooks/useFetchAddress';
+import { useSignupValidation } from '../hooks/useSignupValidation';
+import { formatBirthDate, formatCep, formatPhone, formatCpf } from '../utils/formatters';
 
 export default function SignupScreen({ navigation }) {
   const [name, setName] = useState('');
@@ -18,8 +18,8 @@ export default function SignupScreen({ navigation }) {
   const [gender, setGender] = useState('');
   const [cep, setCep] = useState('');
 
-  const { isValid, validateEmail } = useEmailValidation();
   const { address, fetchAddress, setAddress } = useFetchAddress();
+  const { validateSignup } = useSignupValidation();
 
   useEffect(() => {
     if (cep.length === 9) {
@@ -28,49 +28,44 @@ export default function SignupScreen({ navigation }) {
   }, [cep]);
 
   const handleSignup = async () => {
-    if (name && cpf && email && password && address && houseNumber && phone && birthDate && gender && cep) {
-      if (!await validateEmail(email)) {
-        Alert.alert('Erro no cadastro', 'Por favor, insira um e-mail válido.');
-        return;
+    const validatedData = await validateSignup({
+      name,
+      cpf,
+      email,
+      password,
+      address,
+      houseNumber,
+      complement,
+      phone,
+      birthDate,
+      gender,
+      cep,
+    });
+
+    if (!validatedData) return;
+
+    try {
+      const response = await fetch('https://06a0-2804-14c-fc81-94aa-2847-ab19-def8-c887.ngrok-free.app/signup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(validatedData),
+      });
+
+      const responseText = await response.text();
+
+      if (response.ok) {
+        const data = JSON.parse(responseText);
+        Alert.alert('Cadastro bem-sucedido!', `Bem-vindo, ${name}!`);
+        navigation.navigate('Login');
+      } else {
+        const errorMessage = responseText || 'Erro ao cadastrar usuário.';
+        Alert.alert('Erro no cadastro', errorMessage);
       }
-
-      try {
-        const response = await fetch('https://06a0-2804-14c-fc81-94aa-2847-ab19-def8-c887.ngrok-free.app/signup', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            name,
-            cpf,
-            email,
-            password,
-            address,
-            houseNumber,
-            complement,
-            phone,
-            birthDate,
-            gender,
-            cep,
-          }),
-        });
-
-        const responseText = await response.text();
-
-        if (response.ok) {
-          const data = JSON.parse(responseText);
-          Alert.alert('Cadastro bem-sucedido!', `Bem-vindo, ${name}!`);
-          navigation.navigate('Login');
-        } else {
-          const errorMessage = responseText || 'Erro ao cadastrar usuário.';
-          Alert.alert('Erro no cadastro', errorMessage);
-        }
-      } catch (error) {
-        console.error('Erro ao conectar ao servidor:', error.message);
-        Alert.alert('Erro', 'Não foi possível conectar ao servidor. Verifique sua conexão.');
-      }
-    } else {
-      Alert.alert('Erro no cadastro', 'Por favor, preencha todos os campos obrigatórios.');
+    } catch (error) {
+      console.error('Erro ao conectar ao servidor:', error.message);
+      Alert.alert('Erro', 'Não foi possível conectar ao servidor. Verifique sua conexão.');
     }
   };
 
@@ -90,6 +85,7 @@ export default function SignupScreen({ navigation }) {
           placeholder="CEP"
           value={cep}
           onChangeText={(text) => setCep(formatCep(text))}
+          onBlur={() => fetchAddress(cep.replace(/[^\d]+/g, ''))} // Chama a função ao perder o foco
           keyboardType="numeric"
           maxLength={9} // Limita o número de caracteres no campo de entrada
         />
@@ -103,6 +99,7 @@ export default function SignupScreen({ navigation }) {
           value={houseNumber}
           onChangeText={setHouseNumber}
           keyboardType="numeric"
+          maxLength={6} // Limita o número de caracteres no campo de entrada
         />
         <CustomInput
           placeholder="Complemento (opcional)"
@@ -124,9 +121,9 @@ export default function SignupScreen({ navigation }) {
         />
         <CustomInput
           placeholder="Senha"
-          secureTextEntry
           value={password}
           onChangeText={setPassword}
+          secureTextEntry
         />
         <CustomInput
           placeholder="Data de Nascimento (dd/mm/aaaa)"
