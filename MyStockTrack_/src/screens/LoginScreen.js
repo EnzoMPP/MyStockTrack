@@ -9,7 +9,7 @@ export default function LoginScreen({ navigation }) {
   const handleLogin = async () => {
     if (email && password) {
       try {
-        const response = await fetch('https://472f-2804-14c-fc81-94aa-2847-ab19-def8-c887.ngrok-free.app/login', {
+        const response = await fetch('https://06a0-2804-14c-fc81-94aa-2847-ab19-def8-c887.ngrok-free.app/login', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
