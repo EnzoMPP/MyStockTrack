@@ -22,6 +22,8 @@ const userSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   address: { type: String, required: true },
+  houseNumber: { type: String, required: true },
+  complement: { type: String },
   phone: { type: String, required: true },
   birthDate: { type: String, required: true },  
   gender: { type: String, required: true },
@@ -32,7 +34,7 @@ const User = mongoose.model('User', userSchema);
 
 // Rota de Signup
 app.post('/signup', async (req, res) => {
-  const { name, cpf, email, password, address, phone, birthDate, gender, cep } = req.body;
+  const { name, cpf, email, password, address, houseNumber, complement, phone, birthDate, gender, cep } = req.body;
 
   try {
     const existingCpfUser = await User.findOne({ cpf });
@@ -48,7 +50,7 @@ app.post('/signup', async (req, res) => {
     // Hash da senha
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const newUser = new User({ name, cpf, email, password: hashedPassword, address, phone, birthDate, gender, cep });
+    const newUser = new User({ name, cpf, email, password: hashedPassword, address, houseNumber, complement, phone, birthDate, gender, cep });
     await newUser.save();
     
     res.status(201).json({ message: 'Usuário cadastrado com sucesso!' });
