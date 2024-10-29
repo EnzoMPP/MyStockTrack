@@ -6,7 +6,7 @@ export const formatBirthDate = (text) => {
     if (cleaned.length > 5) {
       cleaned = cleaned.slice(0, 5) + '/' + cleaned.slice(5);
     }
-    return cleaned.slice(0, 10); // Limita a string a 10 caracteres
+    return cleaned.slice(0, 10);
   };
   
   export const formatCep = (text) => {

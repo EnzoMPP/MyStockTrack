@@ -85,9 +85,9 @@ export default function SignupScreen({ navigation }) {
           placeholder="CEP"
           value={cep}
           onChangeText={(text) => setCep(formatCep(text))}
-          onBlur={() => fetchAddress(cep.replace(/[^\d]+/g, ''))} // Chama a função ao perder o foco
+          onBlur={() => fetchAddress(cep.replace(/[^\d]+/g, ''))}
           keyboardType="numeric"
-          maxLength={9} // Limita o número de caracteres no campo de entrada
+          maxLength={9} 
         />
         <CustomInput
           placeholder="Endereço"
@@ -99,7 +99,7 @@ export default function SignupScreen({ navigation }) {
           value={houseNumber}
           onChangeText={setHouseNumber}
           keyboardType="numeric"
-          maxLength={6} // Limita o número de caracteres no campo de entrada
+          maxLength={6} 
         />
         <CustomInput
           placeholder="Complemento (opcional)"
@@ -111,7 +111,7 @@ export default function SignupScreen({ navigation }) {
           value={cpf}
           onChangeText={(text) => setCpf(formatCpf(text))}
           keyboardType="numeric"
-          maxLength={14} // Limita o número de caracteres no campo de entrada
+          maxLength={14} 
         />
         <CustomInput
           placeholder="E-mail"
@@ -130,7 +130,7 @@ export default function SignupScreen({ navigation }) {
           value={birthDate}
           onChangeText={(text) => setBirthDate(formatBirthDate(text))}
           keyboardType="numeric"
-          maxLength={10} // Limita o número de caracteres no campo de entrada
+          maxLength={10} 
         />
         <Picker
           selectedValue={gender}
@@ -147,7 +147,7 @@ export default function SignupScreen({ navigation }) {
           value={phone}
           onChangeText={(text) => setPhone(formatPhone(text))}
           keyboardType="phone-pad"
-          maxLength={15} // Limita o número de caracteres no campo de entrada
+          maxLength={15} 
         />
         <Button title="Cadastrar" onPress={handleSignup} />
         <Text style={styles.loginText} onPress={() => navigation.navigate('Login')}>
