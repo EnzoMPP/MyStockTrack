@@ -49,7 +49,8 @@ export const useSignupValidation = () => {
       return false;
     }
 
-    if (!await validateEmail(email)) {
+    const isEmailValid = await validateEmail(email);
+    if (!isEmailValid) {
       Alert.alert('Erro no cadastro', 'Por favor, insira um e-mail válido.');
       return false;
     }

@@ -1,184 +1,98 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, Button, StyleSheet, Alert, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
-import { Picker } from '@react-native-picker/picker';
-import CustomInput from '../components/CustomInput';
-import { useFetchAddress } from '../hooks/useFetchAddress';
-import { useSignupValidation } from '../hooks/useSignupValidation';
+const express = require('express');
+const mongoose = require('mongoose');
+const bodyParser = require('body-parser');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const cors = require('cors');
 
-export default function SignupScreen({ navigation }) {
-  const [name, setName] = useState('');
-  const [cpf, setCpf] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [houseNumber, setHouseNumber] = useState('');
-  const [complement, setComplement] = useState('');
-  const [phone, setPhone] = useState('');
-  const [birthDate, setBirthDate] = useState('');
-  const [gender, setGender] = useState('');
-  const [cep, setCep] = useState('');
+const app = express();
+const port = 3000;
 
-  const { address, fetchAddress, setAddress } = useFetchAddress();
-  const { validateSignup } = useSignupValidation();
+// Middleware
+app.use(cors());
+app.use(bodyParser.json());
 
-  useEffect(() => {
-    if (cep.length === 9) {
-      fetchAddress(cep.replace(/[^\d]+/g, ''));
+// Conectar ao MongoDB
+mongoose.connect('mongodb://localhost:27017/MyStockTrack').catch(err => console.error('Erro ao conectar ao MongoDB:', err));
+
+// Modelo de users
+const userSchema = new mongoose.Schema({
+  name: { type: String, required: true },
+  cpf: { type: String, required: true, unique: true },
+  email: { type: String, required: true, unique: true },
+  password: { type: String, required: true },
+  address: { type: String, required: true },
+  houseNumber: { type: String, required: true },
+  complement: { type: String },
+  phone: { type: String, required: true },
+  birthDate: { type: String, required: true },  
+  gender: { type: String, required: true },
+  cep: { type: String, required: true }
+});
+
+const User = mongoose.model('User', userSchema);
+
+app.post('/signup', async (req, res) => {
+  const { name, cpf, email, password, address, houseNumber, complement, phone, birthDate, gender, cep } = req.body;
+
+  if (!name || !cpf || !email || !password || !address || !houseNumber || !phone || !birthDate || !gender || !cep) {
+    return res.status(400).json({ error: 'Por favor, preencha todos os campos obrigatórios corretamente.' });
+  }
+
+  try {
+    const existingCpfUser = await User.findOne({ cpf });
+    if (existingCpfUser) {
+      return res.status(400).json({ error: 'CPF já está em uso.' });
     }
-  }, [cep]);
 
-  const handleSignup = async () => {
-    const validatedData = await validateSignup({
-      name,
-      cpf,
-      email,
-      password,
-      address,
-      houseNumber,
-      complement,
-      phone,
-      birthDate,
-      gender,
-      cep,
+    const existingEmailUser = await User.findOne({ email });
+    if (existingEmailUser) {
+      return res.status(400).json({ error: 'E-mail já está em uso.' });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const newUser = new User({ 
+      name, 
+      cpf, 
+      email, 
+      password: hashedPassword, 
+      address, 
+      houseNumber, 
+      complement, 
+      phone, 
+      birthDate, 
+      gender, 
+      cep 
     });
+    await newUser.save();
+    
+    res.status(201).json({ message: 'Usuário cadastrado com sucesso!' });
+  } catch (error) {
+    console.error('Erro ao cadastrar usuário:', error.message);
+    res.status(400).json({ error: 'Erro ao cadastrar usuário.' });
+  }
+});
 
-    if (!validatedData) return;
+app.post('/login', async (req, res) => {
+  const { email, password } = req.body;
 
-    try {
-      const response = await fetch('https://06a0-2804-14c-fc81-94aa-2847-ab19-def8-c887.ngrok-free.app/signup', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(validatedData),
-      });
+  const user = await User.findOne({ email });
 
-      const responseText = await response.text();
+  if (!user) {
+    return res.status(400).json({ error: 'Usuário não encontrado.' });
+  }
 
-      if (response.ok) {
-        const data = JSON.parse(responseText);
-        Alert.alert('Cadastro bem-sucedido!', `Bem-vindo, ${name}!`);
-        navigation.navigate('Login');
-      } else {
-        const errorMessage = responseText || 'Erro ao cadastrar usuário.';
-        Alert.alert('Erro no cadastro', errorMessage);
-      }
-    } catch (error) {
-      console.error('Erro ao conectar ao servidor:', error.message);
-      Alert.alert('Erro', 'Não foi possível conectar ao servidor. Verifique sua conexão.');
-    }
-  };
+  const isPasswordValid = await bcrypt.compare(password, user.password);
 
-  return (
-    <KeyboardAvoidingView
-      style={{ flex: 1 }}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-    >
-      <ScrollView contentContainerStyle={styles.container}>
-        <Text style={styles.title}>Tela de Cadastro</Text>
-        <CustomInput
-          placeholder="Nome Completo"
-          value={name}
-          onChangeText={setName}
-        />
-        <CustomInput
-          placeholder="CEP"
-          value={cep}
-          onChangeText={setCep}
-          onBlur={() => fetchAddress(cep.replace(/[^\d]+/g, ''))} // Chama a função ao perder o foco
-          keyboardType="numeric"
-          maxLength={9} // Limita o número de caracteres no campo de entrada
-        />
-        <CustomInput
-          placeholder="Endereço"
-          value={address}
-          onChangeText={setAddress}
-        />
-        <CustomInput
-          placeholder="Número da Casa"
-          value={houseNumber}
-          onChangeText={setHouseNumber}
-          keyboardType="numeric"
-          maxLength={6} // Limita o número de caracteres no campo de entrada
-        />
-        <CustomInput
-          placeholder="Complemento (opcional)"
-          value={complement}
-          onChangeText={setComplement}
-        />
-        <CustomInput
-          placeholder="CPF"
-          value={cpf}
-          onChangeText={setCpf}
-          keyboardType="numeric"
-          maxLength={14} // Limita o número de caracteres no campo de entrada
-        />
-        <CustomInput
-          placeholder="E-mail"
-          value={email}
-          onChangeText={setEmail}
-          keyboardType="email-address"
-        />
-        <CustomInput
-          placeholder="Senha"
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-        />
-        <CustomInput
-          placeholder="Data de Nascimento (dd/mm/aaaa)"
-          value={birthDate}
-          onChangeText={setBirthDate}
-          keyboardType="numeric"
-          maxLength={10} // Limita o número de caracteres no campo de entrada
-        />
-        <Picker
-          selectedValue={gender}
-          style={styles.input}
-          onValueChange={(itemValue) => setGender(itemValue)}
-        >
-          <Picker.Item label="Selecione o Gênero" value="" />
-          <Picker.Item label="Masculino" value="masculino" />
-          <Picker.Item label="Feminino" value="feminino" />
-          <Picker.Item label="Outro" value="outro" />
-        </Picker>
-        <CustomInput
-          placeholder="Telefone"
-          value={phone}
-          onChangeText={setPhone}
-          keyboardType="phone-pad"
-          maxLength={15} // Limita o número de caracteres no campo de entrada
-        />
-        <Button title="Cadastrar" onPress={handleSignup} />
-        <Text style={styles.loginText} onPress={() => navigation.navigate('Login')}>
-          Já tem uma conta? Faça login
-        </Text>
-      </ScrollView>
-    </KeyboardAvoidingView>
-  );
-}
+  if (!isPasswordValid) {
+    return res.status(400).json({ error: 'Senha incorreta.' });
+  }
 
-const styles = StyleSheet.create({
-  container: {
-    flexGrow: 1,
-    justifyContent: 'center',
-    padding: 16,
-  },
-  title: {
-    fontSize: 24,
-    marginBottom: 20,
-    textAlign: 'center',
-  },
-  input: {
-    height: 40,
-    borderColor: '#ccc',
-    borderWidth: 1,
-    marginBottom: 15,
-    paddingHorizontal: 10,
-  },
-  loginText: {
-    marginTop: 15,
-    color: 'blue',
-    textAlign: 'center',
-    textDecorationLine: 'underline',
-  },
+  const token = jwt.sign({ userId: user._id }, 'secret_key', { expiresIn: '1h' });
+  res.json({ token });
+});
+
+app.listen(port, () => {
+  console.log(`Servidor rodando na porta ${port}`);
 });
