@@ -45,7 +45,7 @@ export default function SignupScreen({ navigation }) {
     if (!validatedData) return;
 
     try {
-      const response = await fetch('https://ba27-2804-14c-fc81-94aa-847f-6da4-e5e5-aebc.ngrok-free.app/signup', {
+      const response = await fetch('https://3c3e-187-32-126-53.ngrok-free.app/signup', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

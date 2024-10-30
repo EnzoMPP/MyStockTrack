@@ -10,6 +10,10 @@ export default function PerfilScreen({ navigation }) {
             await AsyncStorage.removeItem('token');
             await AsyncStorage.removeItem('userSession');
 
+            // Remove os valores dos campos de login armazenados
+            await AsyncStorage.removeItem('username');
+            await AsyncStorage.removeItem('password');
+
             // Navega para a tela de Login após limpar os dados de sessão
             navigation.navigate('Login');
         } catch (error) {
