@@ -1,33 +1,33 @@
-const jwt = require('jsonwebtoken');
+const passport = require('passport');
+const GoogleStrategy = require('passport-google-oauth20').Strategy;
+const User = require('../models/user');
+const { createUser } = require('../controllers/userController');
 
-const authMiddleware = (req, res, next) => {
-  const token = req.header('Authorization').replace('Bearer ', '');
-
-  if (!token) {
-    return res.status(401).json({ error: 'Acesso negado. Token não fornecido.' });
-  }
-
+passport.use(new GoogleStrategy({
+  clientID: process.env.GOOGLE_CLIENT_ID,
+  clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+  callbackURL: process.env.GOOGLE_CALLBACK_URL
+},
+async (accessToken, refreshToken, profile, done) => { 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded;
-    next();
-  } catch (error) {
-    res.status(400).json({ error: 'Token inválido.' });
+    const user = await createUser(profile);
+    return done(null, user);
+  } catch (err) {
+    return done(err, null);
   }
-};
+}));
 
-const generateToken = (userId) => {
-  const token = jwt.sign({ userId }, process.env.JWT_SECRET, { expiresIn: '6h' });
-  return token;
-};
+passport.serializeUser((user, done) => {
+  done(null, user.id);
+});
 
-const verifyToken = (token) => {
+passport.deserializeUser(async (id, done) => {
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    return decoded;
-  } catch (error) {
-    throw new Error('Token inválido');
+    const user = await User.findById(id);
+    done(null, user);
+  } catch (err) {
+    done(err, null);
   }
-};
+});
 
-module.exports = { authMiddleware, generateToken, verifyToken };
+module.exports = passport;
