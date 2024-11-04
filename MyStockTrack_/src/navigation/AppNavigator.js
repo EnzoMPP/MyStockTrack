@@ -12,7 +12,6 @@ import HistoricoScreen from '../screens/HistoricoScreen';
 import FavoritosScreen from '../screens/FavoritosScreen';
 import PerfilScreen from '../screens/PerfilScreen';
 import LoginScreen from '../screens/LoginScreen';
-import SignupScreen from '../screens/SignupScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -36,9 +35,8 @@ export default function AppNavigator() {
   return (
     <NavigationContainer>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="Login" component={LoginScreen} />
-        <Stack.Screen name="Signup" component={SignupScreen} />
-        <Stack.Screen name="AppTabs" component={AppTabs} />
+        <Stack.Screen name="Login" component={LoginScreen} />
+        <Stack.Screen name="AppTabs" component={AppTabs} /> 
       </Stack.Navigator>
     </NavigationContainer>
   );
