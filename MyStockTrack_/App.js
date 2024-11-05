@@ -2,11 +2,8 @@ import React, { useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import * as Linking from 'expo-linking';
 import AppNavigator from './src/navigation/AppNavigator';
-import axios from 'axios';
 import { Alert } from 'react-native';
 import { navigationRef, navigate } from './src/navigation/RootNavigation';
-
-const BACKEND_URL = process.env.backendUrl || 'https://8fe6-2804-14c-fc81-94aa-c594-8bca-84f0-1c66.ngrok-free.app';
 
 export default function App() {
   useEffect(() => {

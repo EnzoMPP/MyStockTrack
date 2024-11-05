@@ -11,15 +11,12 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const GOOGLE_REDIRECT_URI = process.env.GOOGLE_REDIRECT_URI;
 
-app.use(cors({
-  origin: 'http://localhost:19006',
-  credentials: true,
-}));
+app.use(cors());
 
 app.use(express.json());
 
 app.use(session({
-  secret: process.env.SESSION_SECRET || 'seusegredoseguro',
+  secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
   store: MongoStore.create({
