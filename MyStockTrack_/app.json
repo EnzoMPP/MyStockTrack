@@ -9,7 +9,7 @@
     "scheme": "mystocktrack",
     "splash": {
       "image": "./assets/splash.png",
-      "resi zeMode": "contain",
+      "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
     "ios": {

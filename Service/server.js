@@ -9,26 +9,27 @@ const User = require('./models/User');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-
+const GOOGLE_REDIRECT_URI = process.env.GOOGLE_REDIRECT_URI;
 
 app.use(cors({
-  origin: 'http://localhost:19006', 
-  credentials: true, 
+  origin: 'http://localhost:19006',
+  credentials: true,
 }));
+
 app.use(express.json());
 
-
 app.use(session({
-  secret: process.env.SESSION_SECRET, 
+  secret: process.env.SESSION_SECRET || 'seusegredoseguro',
   resave: false,
   saveUninitialized: false,
   store: MongoStore.create({
-    mongoUrl: process.env.MONGO_URI, 
+    mongoUrl: process.env.MONGO_URI,
     collectionName: 'sessions',
   }),
   cookie: {
-    maxAge: 1000 * 60 * 60 * 24, 
-    httpOnly: true, 
+    maxAge: 1000 * 60 * 60 * 24,
+    httpOnly: true,
+    secure: false,
   },
 }));
 
@@ -40,18 +41,18 @@ mongoose.connect(process.env.MONGO_URI)
     console.error('Erro ao conectar ao MongoDB:', err);
   });
 
-
-  app.get('/auth/google', (req, res) => {
+app.get('/auth/google', (req, res) => {
   const oauth2Client = new OAuth2Client(
     process.env.GOOGLE_CLIENT_ID,
     process.env.GOOGLE_CLIENT_SECRET,
-    process.env.GOOGLE_REDIRECT_URI
+    GOOGLE_REDIRECT_URI
   );
 
   const authUrl = oauth2Client.generateAuthUrl({
     access_type: 'offline',
     scope: ['profile', 'email'],
     prompt: 'consent',
+    redirect_uri: GOOGLE_REDIRECT_URI,
   });
 
   res.redirect(authUrl);
@@ -69,7 +70,7 @@ app.get('/auth/google/callback', async (req, res) => {
     const oauth2Client = new OAuth2Client(
       process.env.GOOGLE_CLIENT_ID,
       process.env.GOOGLE_CLIENT_SECRET,
-      process.env.GOOGLE_REDIRECT_URI
+      GOOGLE_REDIRECT_URI
     );
 
     const { tokens } = await oauth2Client.getToken({ code });
@@ -98,15 +99,8 @@ app.get('/auth/google/callback', async (req, res) => {
 
     req.session.userId = user._id;
 
-    res.json({
-      message: 'Login bem-sucedido!',
-      user: {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-        profilePicture: user.profilePicture,
-      },
-    });
+    const redirectUrl = `exp://192.168.0.48:8081?token=${tokens.access_token}`;
+    res.redirect(redirectUrl);
   } catch (error) {
     console.error('Erro ao recuperar o token de acesso', error);
     res.status(500).send('Falha na autenticação');
@@ -130,7 +124,6 @@ app.get('/dashboard', async (req, res) => {
   }
 });
 
-
 app.get('/logout', (req, res) => {
   req.session.destroy(err => {
     if (err) {
@@ -141,7 +134,6 @@ app.get('/logout', (req, res) => {
     res.send('Desconectado com sucesso');
   });
 });
-
 
 app.listen(PORT, () => {
   console.log(`Servidor está rodando em http://localhost:${PORT}`);
