@@ -10,7 +10,7 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
-mongoose.connect('mongodb://localhost:27017/users')
+mongoose.connect(process.env.MONGO_URI)
   .then(() => {
     console.log('MongoDB conectado com sucesso');
   })
@@ -19,12 +19,10 @@ mongoose.connect('mongodb://localhost:27017/users')
   });
 
 app.get('/auth/google', (req, res) => {
-  const { client_id, redirect_uri } = req.query;
-
   const oauth2Client = new OAuth2Client(
-    client_id,
+    process.env.GOOGLE_CLIENT_ID,
     process.env.GOOGLE_CLIENT_SECRET,
-    redirect_uri
+    process.env.GOOGLE_REDIRECT_URI
   );
 
   const authUrl = oauth2Client.generateAuthUrl({
@@ -37,7 +35,7 @@ app.get('/auth/google', (req, res) => {
 });
 
 app.get('/auth/google/callback', async (req, res) => {
-  const { code, client_id, redirect_uri } = req.query;
+  const { code } = req.query;
 
   if (!code) {
     console.error('Nenhum código encontrado nos parâmetros da query');
@@ -46,14 +44,12 @@ app.get('/auth/google/callback', async (req, res) => {
 
   try {
     const oauth2Client = new OAuth2Client(
-      client_id,
+      process.env.GOOGLE_CLIENT_ID,
       process.env.GOOGLE_CLIENT_SECRET,
-      redirect_uri
+      process.env.GOOGLE_REDIRECT_URI
     );
 
-    console.log('Código de autorização:', code);
-    const { tokens } = await oauth2Client.getToken({ code, redirect_uri });
-    console.log('Tokens recebidos:', tokens);
+    const { tokens } = await oauth2Client.getToken({ code });
     oauth2Client.setCredentials(tokens);
 
     if (!tokens || !tokens.access_token) {
@@ -63,7 +59,7 @@ app.get('/auth/google/callback', async (req, res) => {
     const userInfoResponse = await oauth2Client.request({
       url: 'https://www.googleapis.com/oauth2/v3/userinfo',
     });
-    
+
     const userInfo = userInfoResponse.data;
 
     let user = await User.findOne({ googleId: userInfo.sub });

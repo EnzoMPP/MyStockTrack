@@ -3,21 +3,20 @@ import { StyleSheet, View, Button, Alert } from 'react-native';
 import * as AuthSession from 'expo-auth-session';
 import axios from 'axios';
 
-const BACKEND_URL = 'https://27bb-2804-14c-fc81-94aa-3ddf-c819-ac30-bac4.ngrok-free.app'; 
+const BACKEND_URL = 'https://8fe6-2804-14c-fc81-94aa-c594-8bca-84f0-1c66.ngrok-free.app';
 const CLIENT_ID = '32000754721-7sloq4ak1ocbga6cl0i2b622pqpfdvhi.apps.googleusercontent.com';
 
 const REDIRECT_URI = AuthSession.makeRedirectUri({
-  useProxy: true,
+  scheme: 'mystocktrack',
 });
-
-console.log('REDIRECT_URI:', REDIRECT_URI);
+console.log(REDIRECT_URI);
 
 const LoginScreen = ({ navigation }) => {
   const [request, response, promptAsync] = AuthSession.useAuthRequest(
     {
       clientId: CLIENT_ID,
-      redirectUri: REDIRECT_URI,
       scopes: ['profile', 'email'],
+      redirectUri: REDIRECT_URI,
       responseType: 'code',
     },
     {
@@ -26,14 +25,14 @@ const LoginScreen = ({ navigation }) => {
   );
 
   useEffect(() => {
-    if (response?.type === 'success') {
+    if (response?.type === 'success' && response.params?.code) {
       const { code } = response.params;
       axios
         .get(`${BACKEND_URL}/auth/google/callback`, {
-          params: { code, client_id: CLIENT_ID, redirect_uri: REDIRECT_URI },
+          params: { code },
         })
         .then((apiResponse) => {
-          Alert.alert('Login bem-sucedido!', JSON.stringify(apiResponse.data));
+          Alert.alert('Login bem-sucedido!');
           navigation.navigate('AppTabs');
         })
         .catch((error) => {
@@ -48,7 +47,7 @@ const LoginScreen = ({ navigation }) => {
       <Button
         title="Login com Google"
         onPress={() => {
-          promptAsync({ useProxy: true });
+          promptAsync();
         }}
         disabled={!request}
       />
