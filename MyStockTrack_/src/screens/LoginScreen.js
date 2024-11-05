@@ -3,13 +3,9 @@ import { StyleSheet, View, Button, Alert } from 'react-native';
 import * as AuthSession from 'expo-auth-session';
 import axios from 'axios';
 
-const BACKEND_URL = 'https://8fe6-2804-14c-fc81-94aa-c594-8bca-84f0-1c66.ngrok-free.app';
+const BACKEND_URL = 'https://8fe6-2804-14c-fc81-94aa-c594-8bca-84f0-1c66.ngrok-free.app'; 
 const CLIENT_ID = '32000754721-7sloq4ak1ocbga6cl0i2b622pqpfdvhi.apps.googleusercontent.com';
-
-const REDIRECT_URI = AuthSession.makeRedirectUri({
-  scheme: 'mystocktrack',
-});
-console.log(REDIRECT_URI);
+const REDIRECT_URI = AuthSession.makeRedirectUri({ scheme: 'mystocktrack' });
 
 const LoginScreen = ({ navigation }) => {
   const [request, response, promptAsync] = AuthSession.useAuthRequest(
@@ -32,8 +28,13 @@ const LoginScreen = ({ navigation }) => {
           params: { code },
         })
         .then((apiResponse) => {
-          Alert.alert('Login bem-sucedido!');
-          navigation.navigate('AppTabs');
+          // Verifica se a resposta contém os dados do usuário
+          if (apiResponse.data) {
+            Alert.alert('Login bem-sucedido!');
+            navigation.navigate('AppTabs');
+          } else {
+            Alert.alert('Erro no login', 'Não foi possível autenticar com o Google.');
+          }
         })
         .catch((error) => {
           console.error(error);

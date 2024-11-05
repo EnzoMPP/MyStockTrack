@@ -9,20 +9,48 @@
     "scheme": "mystocktrack",
     "splash": {
       "image": "./assets/splash.png",
-      "resizeMode": "contain",
+      "resi zeMode": "contain",
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.enzompp.mystocktrack",
+      "config": {
+        "usesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.enzompp.mystocktrack",
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "data": [
+            {
+              "scheme": "mystocktrack",
+              "host": "redirect"
+            }
+          ],
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
+        }
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "extra": {
+      "googleClientId": "32000754721-7sloq4ak1ocbga6cl0i2b622pqpfdvhi.apps.googleusercontent.com",
+      "backendUrl": "https://8fe6-2804-14c-fc81-94aa-c594-8bca-84f0-1c66.ngrok-free.app",
+      "eas": {
+        "projectId": "792886f4-408e-42cd-9a82-ecb6ef3f2acd"
+      }
+    },
+    "plugins": []
   }
 }
