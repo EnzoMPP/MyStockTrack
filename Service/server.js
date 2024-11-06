@@ -8,7 +8,7 @@ const MongoStore = require('connect-mongo');
 const User = require('./models/User');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT;
 const GOOGLE_REDIRECT_URI = process.env.GOOGLE_REDIRECT_URI;
 
 app.use(cors());
@@ -56,11 +56,12 @@ app.get('/auth/google', (req, res) => {
 });
 
 app.get('/auth/google/callback', async (req, res) => {
+  console.log('📍 Callback Google recebido');
   const { code } = req.query;
 
   if (!code) {
-    console.error('Nenhum código encontrado nos parâmetros da query');
-    return res.status(400).send('Nenhum código encontrado');
+    console.error('❌ Código não encontrado');
+    return res.status(400).send('Código ausente');
   }
 
   try {
@@ -70,41 +71,73 @@ app.get('/auth/google/callback', async (req, res) => {
       GOOGLE_REDIRECT_URI
     );
 
-    const { tokens } = await oauth2Client.getToken({ code });
+    console.log('🔄 Obtendo tokens...');
+    const { tokens } = await oauth2Client.getToken(code);
     oauth2Client.setCredentials(tokens);
 
-    if (!tokens || !tokens.access_token) {
-      throw new Error('Falha ao recuperar o token de acesso');
-    }
-
-    const userInfoResponse = await oauth2Client.request({
-      url: 'https://www.googleapis.com/oauth2/v3/userinfo',
+    console.log('🔄 Obtendo dados do usuário...');
+    const userInfo = await oauth2Client.request({
+      url: 'https://www.googleapis.com/oauth2/v3/userinfo'
     });
 
-    const userInfo = userInfoResponse.data;
-
-    let user = await User.findOne({ googleId: userInfo.sub });
+    let user = await User.findOne({ googleId: userInfo.data.sub });
+    
     if (!user) {
-      user = new User({
-        googleId: userInfo.sub,
-        email: userInfo.email,
-        name: userInfo.name,
-        profilePicture: userInfo.picture,
+      console.log('🆕 Criando novo usuário');
+      user = await User.create({
+        googleId: userInfo.data.sub,
+        email: userInfo.data.email,
+        name: userInfo.data.name,
+        profilePicture: userInfo.data.picture
       });
-      await user.save();
     }
 
+    // Salvar sessão
+    console.log('🔄 Salvando sessão...');
     req.session.userId = user._id;
-
+    req.session.email = user.email;
     
+    await new Promise((resolve, reject) => {
+      req.session.save(err => {
+        if (err) {
+          console.error('❌ Erro ao salvar sessão:', err);
+          reject(err);
+        }
+        console.log('✅ Sessão salva com sucesso');
+        console.log('📝 Dados da sessão:', req.session);
+        resolve();
+      });
+    });
+
     const redirectUrl = `${process.env.IP_MOBILE}?token=${tokens.access_token}`;
+    console.log('🔄 Redirecionando para:', redirectUrl);
     res.redirect(redirectUrl);
+
   } catch (error) {
-    console.error('Erro ao recuperar o token de acesso', error);
-    res.status(500).send('Falha na autenticação');
+    console.error('❌ Erro:', error);
+    res.status(500).send('Erro na autenticação');
   }
 });
 
+// Rota de logout
+app.post('/logout', (req, res) => {
+  console.log('Requisição de logout recebida');
+  if (req.session) {
+    console.log('Sessão encontrada, destruindo sessão...');
+    req.session.destroy(err => {
+      if (err) {
+        console.error('Erro ao destruir a sessão:', err);
+        return res.status(500).json({ message: 'Erro ao fazer logout' });
+      }
+      res.clearCookie('connect.sid');
+      console.log('Sessão destruída e cookie limpo');
+      return res.status(200).json({ message: 'Logout bem-sucedido' });
+    });
+  } else {
+    console.log('Nenhuma sessão encontrada');
+    return res.status(400).json({ message: 'Sessão não encontrada' });
+  }
+});
 
 app.listen(PORT, () => {
   console.log(`Servidor está rodando em http://localhost:${PORT}`);
