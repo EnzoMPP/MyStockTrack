@@ -92,7 +92,6 @@ app.get('/auth/google/callback', async (req, res) => {
       });
     }
 
-    // Salvar sessão
     console.log('🔄 Salvando sessão...');
     req.session.userId = user._id;
     req.session.email = user.email;
@@ -119,7 +118,6 @@ app.get('/auth/google/callback', async (req, res) => {
   }
 });
 
-// Rota de logout
 app.post('/logout', (req, res) => {
   console.log('Requisição de logout recebida');
   if (req.session) {
