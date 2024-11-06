@@ -4,6 +4,7 @@ import * as Linking from 'expo-linking';
 import AppNavigator from './src/navigation/AppNavigator';
 import { Alert } from 'react-native';
 import { navigationRef, navigate } from './src/navigation/RootNavigation';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function App() {
   useEffect(() => {
@@ -14,6 +15,10 @@ export default function App() {
       const { queryParams } = parsed;
       if (queryParams?.token) {
         console.log('Token recebido:', queryParams.token);
+
+        // Salvar o token no AsyncStorage
+        await AsyncStorage.setItem('token', queryParams.token);
+        console.log('Token salvo no AsyncStorage');
 
         Alert.alert('Login bem-sucedido!');
         navigate('AppTabs');
