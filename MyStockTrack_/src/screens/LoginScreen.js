@@ -1,30 +1,17 @@
 import React from 'react';
-import { StyleSheet, View, Button } from 'react-native';
-import * as AuthSession from 'expo-auth-session';
-import { BACKEND_URL, GOOGLE_CLIENT_ID } from '@env';
-
-const REDIRECT_URI = AuthSession.makeRedirectUri();
+import { StyleSheet, View, Image } from 'react-native';
+import useAuthRequest from '../hooks/useAuthRequest';
+import CustomButton from '../components/CustomButton';
 
 const LoginScreen = () => {
-  const [request, response, promptAsync] = AuthSession.useAuthRequest(
-    {
-      clientId: GOOGLE_CLIENT_ID,
-      scopes: ['profile', 'email'],
-      redirectUri: REDIRECT_URI,
-      responseType: 'code',
-    },
-    {
-      authorizationEndpoint: `${BACKEND_URL}/auth/google`,
-    }
-  );
+  const { request, promptAsync } = useAuthRequest();
 
   return (
     <View style={styles.container}>
-      <Button
+      <Image source={require('../../assets/images/logo.png')} style={styles.logo} />
+      <CustomButton
         title="Login com Google"
-        onPress={() => {
-          promptAsync();
-        }}
+        onPress={() => promptAsync()}
         disabled={!request}
       />
     </View>
@@ -32,7 +19,19 @@ const LoginScreen = () => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  container: { 
+    flex: 1,
+    justifyContent: 'center', 
+    alignItems: 'center', 
+    backgroundColor: '#f5f5f5', 
+    paddingHorizontal: 20,
+  },
+  logo: {
+    width: 200,
+    height: 200,
+    marginBottom: 40,
+    resizeMode: 'contain',
+  },
 });
 
 export default LoginScreen;
