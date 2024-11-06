@@ -105,33 +105,6 @@ app.get('/auth/google/callback', async (req, res) => {
   }
 });
 
-app.get('/dashboard', async (req, res) => {
-  if (!req.session.userId) {
-    return res.status(401).send('Não autenticado');
-  }
-
-  try {
-    const user = await User.findById(req.session.userId);
-    if (!user) {
-      return res.status(401).send('Usuário não encontrado');
-    }
-    res.send(`Bem-vindo, ${user.name}!`);
-  } catch (error) {
-    console.error('Erro ao buscar o usuário na sessão', error);
-    res.status(500).send('Erro interno');
-  }
-});
-
-app.get('/logout', (req, res) => {
-  req.session.destroy(err => {
-    if (err) {
-      console.error('Erro ao destruir a sessão', err);
-      return res.status(500).send('Erro ao fazer logout');
-    }
-    res.clearCookie('connect.sid');
-    res.send('Desconectado com sucesso');
-  });
-});
 
 app.listen(PORT, () => {
   console.log(`Servidor está rodando em http://localhost:${PORT}`);
