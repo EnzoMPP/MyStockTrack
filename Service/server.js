@@ -96,7 +96,8 @@ app.get('/auth/google/callback', async (req, res) => {
 
     req.session.userId = user._id;
 
-    const redirectUrl = `exp://192.168.0.48:8081?token=${tokens.access_token}`;
+    
+    const redirectUrl = `${process.env.IP_MOBILE}?token=${tokens.access_token}`;
     res.redirect(redirectUrl);
   } catch (error) {
     console.error('Erro ao recuperar o token de acesso', error);
