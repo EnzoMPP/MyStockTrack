@@ -6,6 +6,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { BACKEND_URL } from "@env";
 import { UserContext } from "../context/UserContext";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
 const PerfilScreen = () => {
   const { handleLogout } = useLogout();
@@ -75,7 +76,11 @@ const PerfilScreen = () => {
       ) : (
         <Text style={styles.errorText}>Usuário não encontrado.</Text>
       )}
-      <CustomButton title="Logout" onPress={handleLogout} />
+      <CustomButton
+        title="Logout"
+        icon={<MaterialIcons name="logout" size={24} color="white" />}
+        onPress={handleLogout}
+      />
     </View>
   );
 };

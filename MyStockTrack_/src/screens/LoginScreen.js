@@ -1,5 +1,6 @@
 import React from "react";
 import { StyleSheet, View, Image } from "react-native";
+import { Fontisto } from '@expo/vector-icons';
 import useAuthRequest from "../hooks/useAuthRequest";
 import CustomButton from "../components/CustomButton";
 
@@ -13,6 +14,7 @@ const LoginScreen = () => {
         style={styles.logo}
       />
       <CustomButton
+        icon={<Fontisto name="google" size={24} color="white" />}
         title="Login com Google"
         onPress={() => promptAsync()}
         disabled={!request}
