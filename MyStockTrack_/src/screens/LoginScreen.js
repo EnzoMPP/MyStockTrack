@@ -35,3 +35,5 @@ const styles = StyleSheet.create({
 });
 
 export default LoginScreen;
+
+//ngrok http --url=modest-moderately-tapir.ngrok-free.app 3000

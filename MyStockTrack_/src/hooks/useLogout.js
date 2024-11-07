@@ -32,17 +32,21 @@ export default function useLogout() {
       }
 
       console.log("🔄 Chamando backend para logout");
-      const response = await axios.post(
-        `${BACKEND_URL}/logout`, 
-        {}, 
-        {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          },
-          withCredentials: true
-        }
-      );
-      console.log("✅ Resposta do backend:", response.data);
+      try {
+        const response = await axios.post(
+          `${BACKEND_URL}/logout`,
+          {},
+          {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            },
+            withCredentials: true
+          }
+        );
+        console.log("✅ Resposta do backend:", response.data);
+      } catch (backendError) {
+        console.error("❌ Erro ao chamar backend para logout:", backendError);
+      }
 
       await AsyncStorage.removeItem('token');
       console.log("🗑️ Token removido do AsyncStorage");
@@ -51,7 +55,7 @@ export default function useLogout() {
       console.log("✅ Logout completo, navegando para Login");
     } catch (error) {
       console.error("❌ Erro no processo de logout:", error?.response?.data || error.message);
-      
+
       await AsyncStorage.removeItem('token');
       navigation.navigate('Login');
     }
