@@ -1,10 +1,15 @@
-import { useEffect } from 'react';
-import * as Linking from 'expo-linking';
+import { useEffect, useContext } from 'react';
 import { Alert } from 'react-native';
-import { navigate } from '../navigation/RootNavigation';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios'; 
+import { UserContext } from '../context/UserContext';
+import * as Linking from 'expo-linking';
+import { navigationRef } from '../navigation/RootNavigation'; 
+import { BACKEND_URL } from '@env'; 
 
 export default function useAuth() {
+  const { setUser } = useContext(UserContext);
+
   useEffect(() => {
     const handleDeepLink = async (event) => {
       const { url } = event;
@@ -14,12 +19,29 @@ export default function useAuth() {
       if (queryParams?.token) {
         console.log('Token recebido:', queryParams.token);
 
-        // Para Salvar o token no AsyncStorage
+        
         await AsyncStorage.setItem('token', queryParams.token);
         console.log('Token salvo no AsyncStorage');
 
         Alert.alert('Login bem-sucedido!');
-        navigate('AppTabs');
+        if (navigationRef.isReady()) {
+          navigationRef.navigate('AppTabs');
+        }
+
+        
+        try {
+          const response = await axios.get(`${BACKEND_URL}/perfil`, {
+            headers: {
+              'Authorization': `Bearer ${queryParams.token}`,
+            },
+          });
+          console.log('📥 Dados recebidos do backend:', response.data);
+          setUser(response.data); 
+          console.log('👤 Usuário definido no contexto:', response.data);
+        } catch (error) {
+          console.error('Erro ao buscar dados do usuário:', error);
+          Alert.alert('Erro ao buscar dados do usuário.');
+        }
       }
     };
 

@@ -14,6 +14,7 @@ const JWT_SECRET = process.env.JWT_SECRET;
 app.use(cors());
 app.use(express.json());
 
+// Conexão com o MongoDB
 mongoose.connect(process.env.MONGO_URI)
   .then(() => {
     console.log('✅ MongoDB conectado com sucesso');
@@ -22,6 +23,7 @@ mongoose.connect(process.env.MONGO_URI)
     console.error('Erro ao conectar ao MongoDB:', err);
   });
 
+// Função para gerar o JWT
 function generateToken(user) {
   return jwt.sign(
     {
@@ -33,6 +35,7 @@ function generateToken(user) {
   );
 }
 
+// Middleware para verificar o JWT
 function authenticateToken(req, res, next) {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
@@ -52,6 +55,7 @@ function authenticateToken(req, res, next) {
   });
 }
 
+// Rota para iniciar a autenticação com o Google
 app.get('/auth/google', (req, res) => {
   const oauth2Client = new OAuth2Client(
     process.env.GOOGLE_CLIENT_ID,
@@ -68,6 +72,7 @@ app.get('/auth/google', (req, res) => {
   res.redirect(authUrl);
 });
 
+// Rota de callback do Google
 app.get('/auth/google/callback', async (req, res) => {
   console.log('📍 Callback Google recebido');
   const { code } = req.query;
@@ -120,19 +125,32 @@ app.get('/auth/google/callback', async (req, res) => {
   }
 });
 
-app.get('/perfil', authenticateToken, (req, res) => {
+// Rota protegida para obter informações do perfil
+app.get('/perfil', authenticateToken, async (req, res) => {
   console.log('📍 Acessando perfil de:', req.user.email);
-  res.json({
-    message: 'Perfil acessado com sucesso',
-    user: req.user
-  });
+  try {
+    const user = await User.findById(req.user.userId);
+    if (!user) {
+      return res.status(404).json({ message: 'Usuário não encontrado' });
+    }
+    res.json({
+      name: user.name,
+      email: user.email,
+      profilePicture: user.profilePicture
+    });
+  } catch (error) {
+    console.error('❌ Erro ao buscar perfil:', error);
+    res.status(500).json({ message: 'Erro ao buscar perfil' });
+  }
 });
 
+// Rota de logout
 app.post('/logout', authenticateToken, (req, res) => {
   console.log('📍 Logout solicitado por:', req.user.email);
   res.status(200).json({ message: 'Logout bem-sucedido' });
 });
 
+// Iniciar o servidor
 app.listen(PORT, () => {
   console.log(`Servidor está rodando em http://localhost:${PORT}`);
 });
