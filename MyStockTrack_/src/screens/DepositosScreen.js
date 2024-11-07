@@ -1,5 +1,4 @@
-import { View,Text, StyleSheet } from "react-native";
-
+import { View, Text, StyleSheet } from "react-native";
 
 export default DepositosScreen = () => {
   return (
@@ -7,10 +6,8 @@ export default DepositosScreen = () => {
       <Text>Depositos Screen</Text>
     </View>
   );
-}
-
-
+};
 
 const styles = StyleSheet.create({
-    container: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  });
+  container: { flex: 1, justifyContent: "center", alignItems: "center" },
+});

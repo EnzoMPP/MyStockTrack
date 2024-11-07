@@ -1,11 +1,11 @@
-import React, { useEffect, useContext } from 'react';
-import { View, Text, StyleSheet, Image, ActivityIndicator } from 'react-native';
-import useLogout from '../hooks/useLogout';
-import CustomButton from '../components/CustomButton';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import axios from 'axios';
-import { BACKEND_URL } from '@env';
-import { UserContext } from '../context/UserContext';
+import React, { useEffect, useContext } from "react";
+import { View, Text, StyleSheet, Image, ActivityIndicator } from "react-native";
+import useLogout from "../hooks/useLogout";
+import CustomButton from "../components/CustomButton";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import axios from "axios";
+import { BACKEND_URL } from "@env";
+import { UserContext } from "../context/UserContext";
 
 const PerfilScreen = () => {
   const { handleLogout } = useLogout();
@@ -16,7 +16,7 @@ const PerfilScreen = () => {
     const fetchUserData = async () => {
       try {
         console.log("🔍 Iniciando fetch de dados do usuário");
-        const token = await AsyncStorage.getItem('token');
+        const token = await AsyncStorage.getItem("token");
         console.log("🔑 Token obtido:", token);
 
         if (token) {
@@ -25,13 +25,13 @@ const PerfilScreen = () => {
 
           const response = await axios.get(endpoint, {
             headers: {
-              'Authorization': `Bearer ${token}`
-            }
+              Authorization: `Bearer ${token}`,
+            },
           });
           console.log("📥 Dados recebidos do backend:", response.data);
 
           setUser(response.data);
-          console.log('👤 Usuário definido no contexto:', response.data);
+          console.log("👤 Usuário definido no contexto:", response.data);
         } else {
           console.log("❌ Nenhum token encontrado");
         }
@@ -62,7 +62,12 @@ const PerfilScreen = () => {
           <Image
             source={{ uri: `${user.profilePicture}?sz=400` }}
             style={styles.profileImage}
-            onError={(e) => console.error('❌ Erro ao carregar a imagem:', e.nativeEvent.error)}
+            onError={(e) =>
+              console.error(
+                "❌ Erro ao carregar a imagem:",
+                e.nativeEvent.error
+              )
+            }
           />
           <Text style={styles.name}>{user.name}</Text>
           <Text style={styles.email}>{user.email}</Text>
@@ -76,12 +81,12 @@ const PerfilScreen = () => {
 };
 
 const styles = StyleSheet.create({
-  container: { 
-    flex: 1, 
-    justifyContent: 'center',
-    alignItems: 'center',
+  container: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
     paddingHorizontal: 20,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: "#f5f5f5",
   },
   profileImage: {
     width: 120,
@@ -92,21 +97,21 @@ const styles = StyleSheet.create({
   name: {
     fontSize: 24,
     marginBottom: 10,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   email: {
     fontSize: 18,
-    color: '#666',
+    color: "#666",
     marginBottom: 30,
   },
   loadingText: {
     marginTop: 10,
     fontSize: 16,
-    color: '#4285F4',
+    color: "#4285F4",
   },
   errorText: {
     fontSize: 18,
-    color: 'red',
+    color: "red",
     marginBottom: 30,
   },
 });

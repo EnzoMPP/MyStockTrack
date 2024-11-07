@@ -1,8 +1,8 @@
-import { useNavigation } from '@react-navigation/native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import * as AuthSession from 'expo-auth-session';
-import axios from 'axios';
-import { BACKEND_URL } from '@env';
+import { useNavigation } from "@react-navigation/native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as AuthSession from "expo-auth-session";
+import axios from "axios";
+import { BACKEND_URL } from "@env";
 
 export default function useLogout() {
   const navigation = useNavigation();
@@ -11,12 +11,12 @@ export default function useLogout() {
     try {
       console.log("📍 Iniciando o processo de logout");
 
-      const token = await AsyncStorage.getItem('token');
+      const token = await AsyncStorage.getItem("token");
       console.log("🔑 Token obtido:", token);
 
       if (!token) {
         console.log("❌ Nenhum token encontrado para revogação");
-        navigation.navigate('Login');
+        navigation.navigate("Login");
         return;
       }
 
@@ -24,7 +24,7 @@ export default function useLogout() {
       try {
         await AuthSession.revokeAsync(
           { token },
-          { revocationEndpoint: 'https://oauth2.googleapis.com/revoke' }
+          { revocationEndpoint: "https://oauth2.googleapis.com/revoke" }
         );
         console.log("✅ Token Google revogado com sucesso");
       } catch (revokeError) {
@@ -38,9 +38,9 @@ export default function useLogout() {
           {},
           {
             headers: {
-              'Authorization': `Bearer ${token}`
+              Authorization: `Bearer ${token}`,
             },
-            withCredentials: true
+            withCredentials: true,
           }
         );
         console.log("✅ Resposta do backend:", response.data);
@@ -48,16 +48,19 @@ export default function useLogout() {
         console.error("❌ Erro ao chamar backend para logout:", backendError);
       }
 
-      await AsyncStorage.removeItem('token');
+      await AsyncStorage.removeItem("token");
       console.log("🗑️ Token removido do AsyncStorage");
 
-      navigation.navigate('Login');
+      navigation.navigate("Login");
       console.log("✅ Logout completo, navegando para Login");
     } catch (error) {
-      console.error("❌ Erro no processo de logout:", error?.response?.data || error.message);
+      console.error(
+        "❌ Erro no processo de logout:",
+        error?.response?.data || error.message
+      );
 
-      await AsyncStorage.removeItem('token');
-      navigation.navigate('Login');
+      await AsyncStorage.removeItem("token");
+      navigation.navigate("Login");
     }
   };
 

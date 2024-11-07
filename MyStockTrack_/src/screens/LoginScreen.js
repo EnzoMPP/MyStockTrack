@@ -1,14 +1,17 @@
-import React from 'react';
-import { StyleSheet, View, Image } from 'react-native';
-import useAuthRequest from '../hooks/useAuthRequest';
-import CustomButton from '../components/CustomButton';
+import React from "react";
+import { StyleSheet, View, Image } from "react-native";
+import useAuthRequest from "../hooks/useAuthRequest";
+import CustomButton from "../components/CustomButton";
 
 const LoginScreen = () => {
   const { request, promptAsync } = useAuthRequest();
 
   return (
     <View style={styles.container}>
-      <Image source={require('../../assets/images/logo.png')} style={styles.logo} />
+      <Image
+        source={require("../../assets/images/logo.png")}
+        style={styles.logo}
+      />
       <CustomButton
         title="Login com Google"
         onPress={() => promptAsync()}
@@ -19,18 +22,18 @@ const LoginScreen = () => {
 };
 
 const styles = StyleSheet.create({
-  container: { 
+  container: {
     flex: 1,
-    justifyContent: 'center', 
-    alignItems: 'center', 
-    backgroundColor: '#f5f5f5', 
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#f5f5f5",
     paddingHorizontal: 20,
   },
   logo: {
     width: 200,
     height: 200,
     marginBottom: 40,
-    resizeMode: 'contain',
+    resizeMode: "contain",
   },
 });
 
