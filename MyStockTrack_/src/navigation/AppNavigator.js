@@ -1,4 +1,3 @@
-// src/navigation/AppNavigator.js
 import React, { useContext } from "react";
 import { Image, View, StyleSheet } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
