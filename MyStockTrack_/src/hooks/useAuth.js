@@ -28,7 +28,7 @@ export default function useAuth() {
         }
 
         try {
-          const response = await axios.get(`${BACKEND_URL}/perfil`, {
+          const response = await axios.get(`${BACKEND_URL}/profile`, {
             headers: {
               Authorization: `Bearer ${queryParams.token}`,
             },

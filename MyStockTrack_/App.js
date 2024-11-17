@@ -39,7 +39,7 @@ function AuthHandler({ children }) {
             {
               text: "Sim",
               onPress: async () => {
-                await handleLogout();
+                // await handleLogout();
                 BackHandler.exitApp();
               },
             },
@@ -70,4 +70,3 @@ export default function App() {
     </UserProvider>
   );
 }
-//ngrok http --url=modest-moderately-tapir.ngrok-free.app 3000

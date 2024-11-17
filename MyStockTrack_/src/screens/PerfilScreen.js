@@ -21,7 +21,7 @@ const PerfilScreen = () => {
         console.log("🔑 Token obtido:", token);
 
         if (token) {
-          const endpoint = `${BACKEND_URL}/perfil`;
+          const endpoint = `${BACKEND_URL}/profile`;
           console.log(`📡 Enviando requisição para ${endpoint}`);
 
           const response = await axios.get(endpoint, {
@@ -39,7 +39,6 @@ const PerfilScreen = () => {
       } catch (error) {
         console.error("Erro ao buscar dados do usuário:", error);
       } finally {
-        console.log("⏳ Finalizando fetch de dados do usuário");
         setLoading(false);
       }
     };
