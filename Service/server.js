@@ -17,7 +17,7 @@ const FINNHUB_API_KEY = process.env.FINNHUB_API_KEY;
 app.use(cors());
 app.use(express.json());
 
-// Conectar ao banco de dados
+
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => {
@@ -109,7 +109,7 @@ app.get('/auth/google/callback', async (req, res) => {
         email: userInfo.email,
         name: userInfo.name,
         profilePicture: userInfo.picture,
-        balance: 0, // Iniciando saldo em zero
+        balance: 0, 
       });
     }
 
@@ -189,11 +189,11 @@ app.post('/transactions/buy', authenticateToken, async (req, res) => {
       return res.status(400).json({ message: 'Saldo insuficiente para comprar ações' });
     }
 
-    // Deduzir o valor do saldo do usuário
+    
     user.balance -= totalCost;
     await user.save();
 
-    // Registrar a transação
+    
     const transaction = new Transaction({
       userId: req.user.userId,
       symbol,
@@ -217,7 +217,7 @@ app.post('/transactions/sell', authenticateToken, async (req, res) => {
     const { symbol, quantity, price } = req.body;
     const totalProceeds = price * quantity;
 
-    // Verificar se o usuário possui ações suficientes
+    
     const userTransactions = await Transaction.find({ userId: req.user.userId, symbol });
     let totalQuantity = 0;
     userTransactions.forEach(transaction => {
@@ -232,19 +232,19 @@ app.post('/transactions/sell', authenticateToken, async (req, res) => {
       return res.status(400).json({ message: 'Quantidade insuficiente de ações para vender' });
     }
 
-    // Adicionar o valor ao saldo do usuário
+    
     const user = await User.findById(req.user.userId);
     user.balance += totalProceeds;
     await user.save();
 
-    // Registrar a transação
+    
     const transaction = new Transaction({
       userId: req.user.userId,
       symbol,
       quantity,
       price,
       transactionType: 'SELL',
-      assetType: 'STOCK', // Ajustar conforme necessário
+      assetType: 'STOCK', 
     });
     await transaction.save();
 
@@ -303,10 +303,10 @@ app.get('/portfolio', authenticateToken, async (req, res) => {
 
     const assetQuotesPromises = assets.map(async asset => {
       try {
-        // Ajusta o símbolo para o formato do Finnhub (ações brasileiras)
+        
         const formattedSymbol = `${asset.symbol}.SAO`;
         
-        console.log(`🔍 Buscando cotação para: ${formattedSymbol}`); // Debug
+        console.log(`🔍 Buscando cotação para: ${formattedSymbol}`); 
 
         const response = await axios.get('https://finnhub.io/api/v1/quote', {
           params: {
@@ -315,10 +315,10 @@ app.get('/portfolio', authenticateToken, async (req, res) => {
           },
         });
 
-        const currentPrice = response.data?.c || asset.averagePrice; // Usa preço médio como fallback
+        const currentPrice = response.data?.c || asset.averagePrice; 
         const currentValue = currentPrice * asset.quantity;
 
-        console.log(`💰 ${asset.symbol}: Preço atual = ${currentPrice}, Valor total = ${currentValue}`); // Debug
+        console.log(`💰 ${asset.symbol}: Preço atual = ${currentPrice}, Valor total = ${currentValue}`); 
 
         return {
           ...asset,
@@ -327,7 +327,7 @@ app.get('/portfolio', authenticateToken, async (req, res) => {
         };
       } catch (error) {
         console.error(`❌ Erro ao obter preço de ${asset.symbol}:`, error.message);
-        // Fallback para preço médio em caso de erro
+        
         return {
           ...asset,
           currentPrice: asset.averagePrice,
@@ -365,13 +365,22 @@ app.get('/portfolio', authenticateToken, async (req, res) => {
 
 app.get('/market/stocks', authenticateToken, async (req, res) => {
   try {
-    // Lista de ações que queremos mostrar (você pode expandir essa lista)
-    const stockSymbols = ['AAPL', 'GOOGL', 'MSFT', 'AMZN', 'META', 'TSLA', 'NVDA', 'JPM'];
+    const symbolsResponse = await axios.get('https://finnhub.io/api/v1/stock/symbol', {
+      params: {
+        exchange: 'US',
+        token: FINNHUB_API_KEY
+      }
+    });
+
+    const stockSymbols = symbolsResponse.data.map(stock => stock.symbol);
+
+    const limitedStockSymbols = stockSymbols.slice(0, 20); 
+
     
-    // Buscar informações de cada ação
-    const stocksPromises = stockSymbols.map(async (symbol) => {
+    
+    const stocksPromises = limitedStockSymbols.map(async (symbol) => {
       try {
-        // Buscar cotação atual
+        
         const quoteResponse = await axios.get('https://finnhub.io/api/v1/quote', {
           params: {
             symbol: symbol,
@@ -379,7 +388,7 @@ app.get('/market/stocks', authenticateToken, async (req, res) => {
           }
         });
 
-        // Buscar informações da empresa
+        
         const companyResponse = await axios.get('https://finnhub.io/api/v1/stock/profile2', {
           params: {
             symbol: symbol,
@@ -394,11 +403,11 @@ app.get('/market/stocks', authenticateToken, async (req, res) => {
           symbol: symbol,
           companyName: company.name || symbol,
           currentPrice: quote.c || 0,
-          change: quote.d || 0, // Mudança em valor
-          changePercent: quote.dp || 0, // Mudança percentual
-          high: quote.h || 0, // Máxima do dia
-          low: quote.l || 0, // Mínima do dia
-          previousClose: quote.pc || 0, // Fechamento anterior
+          change: quote.d || 0, 
+          changePercent: quote.dp || 0, 
+          high: quote.h || 0, 
+          low: quote.l || 0, 
+          previousClose: quote.pc || 0, 
           logo: company.logo || null,
           currency: company.currency || 'USD',
         };
@@ -410,7 +419,7 @@ app.get('/market/stocks', authenticateToken, async (req, res) => {
 
     const stocks = (await Promise.all(stocksPromises)).filter(stock => stock !== null);
 
-    // Ordenar por variação percentual (do maior para o menor)
+    
     stocks.sort((a, b) => b.changePercent - a.changePercent);
 
     res.status(200).json({
@@ -421,6 +430,62 @@ app.get('/market/stocks', authenticateToken, async (req, res) => {
   } catch (error) {
     console.error('❌ Erro ao buscar ações:', error);
     res.status(500).json({ message: 'Erro ao buscar ações' });
+  }
+});
+
+
+app.get('/api/stocks/search/:term', async (req, res) => {
+  try {
+    const searchTerm = req.params.term.toUpperCase();
+
+    
+    const symbolsResponse = await axios.get('https://finnhub.io/api/v1/stock/symbol', {
+      params: {
+        exchange: 'US',
+        token: FINNHUB_API_KEY
+      }
+    });
+
+    
+    const filteredSymbols = symbolsResponse.data
+      .filter(stock => stock.symbol.includes(searchTerm))
+      .slice(0, 10); 
+
+    
+    const stocksPromises = filteredSymbols.map(async (stock) => {
+      try {
+        const [quoteResponse, companyResponse] = await Promise.all([
+          axios.get('https://finnhub.io/api/v1/quote', {
+            params: {
+              symbol: stock.symbol,
+              token: FINNHUB_API_KEY
+            }
+          }),
+          axios.get('https://finnhub.io/api/v1/stock/profile2', {
+            params: {
+              symbol: stock.symbol,
+              token: FINNHUB_API_KEY
+            }
+          })
+        ]);
+
+        return {
+          symbol: stock.symbol,
+          quote: quoteResponse.data,
+          company: companyResponse.data
+        };
+      } catch (error) {
+        console.error(`Erro ao buscar dados para ${stock.symbol}:`, error);
+        return null;
+      }
+    });
+
+    const stocks = (await Promise.all(stocksPromises)).filter(Boolean);
+    res.json(stocks);
+
+  } catch (error) {
+    console.error('Erro na pesquisa de ações:', error);
+    res.status(500).json({ error: 'Erro ao pesquisar ações' });
   }
 });
 
