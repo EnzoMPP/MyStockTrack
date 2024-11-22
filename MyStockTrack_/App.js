@@ -6,6 +6,7 @@ import { navigationRef } from "./src/navigation/RootNavigation";
 import useAuth from "./src/hooks/useAuth";
 import { UserProvider } from "./src/context/UserContext";
 import useLogout from "./src/hooks/useLogout";
+import { FavoritesProvider } from './src/context/FavoritesContext';
 
 function AuthHandler({ children }) {
   useAuth();
@@ -39,7 +40,7 @@ function AuthHandler({ children }) {
             {
               text: "Sim",
               onPress: async () => {
-                // await handleLogout();
+               
                 BackHandler.exitApp();
               },
             },
@@ -62,11 +63,13 @@ function AuthHandler({ children }) {
 export default function App() {
   return (
     <UserProvider>
-      <NavigationContainer ref={navigationRef}>
-        <AuthHandler>
-          <AppNavigator />
-        </AuthHandler>
-      </NavigationContainer>
+      <FavoritesProvider>
+        <NavigationContainer ref={navigationRef}>
+          <AuthHandler>
+            <AppNavigator />
+          </AuthHandler>
+        </NavigationContainer>
+      </FavoritesProvider>
     </UserProvider>
   );
 }

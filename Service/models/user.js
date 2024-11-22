@@ -6,6 +6,10 @@ const userSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   profilePicture: { type: String },
   balance: { type: Number, default: 0 }, 
+  favorites: {
+    type: [String],
+    default: []
+  }
 });
 
 const User = mongoose.model('User', userSchema);

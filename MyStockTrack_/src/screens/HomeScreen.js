@@ -38,9 +38,9 @@ export default function HomeScreen() {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      console.log("Dados brutos do backend:", JSON.stringify(data, null, 2)); // Log detalhado
+      console.log("Dados brutos do backend:", JSON.stringify(data, null, 2)); 
 
-      // Conversão explícita para número usando parseFloat
+      
       setPortfolioSummary({
         totalInvested: parseFloat(data.totalInvested) || 0,
         currentValue: parseFloat(data.currentValue) || 0,
@@ -61,7 +61,7 @@ export default function HomeScreen() {
         .filter((asset) => asset.type === "STOCK")
         .map((stock) => {
           const value = parseFloat(stock.currentValue);
-          console.log(`Processando ação ${stock.symbol}: valor = ${value}`); // Log por ação
+          console.log(`Processando ação ${stock.symbol}: valor = ${value}`); 
           return {
             symbol: stock.symbol,
             currentValue: value || 0,
@@ -93,13 +93,13 @@ export default function HomeScreen() {
     yaxis: {
       title: "Valor Investido (R$)",
       automargin: true,
-      rangemode: "tozero", // Força escala começando do zero
-      type: "linear", // Força escala linear
+      rangemode: "tozero", 
+      type: "linear", 
     },
     margin: { l: 50, r: 40, t: 60, b: 80 },
     bargap: 0.2,
-    height: 400, // Altura fixa
-    width: screenWidth - 52, // Largura ajustada
+    height: 400, 
+    width: screenWidth - 52, 
   };
 
   if (loading) {

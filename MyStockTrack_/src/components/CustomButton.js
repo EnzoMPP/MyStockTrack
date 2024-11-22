@@ -6,7 +6,7 @@ const CustomButton = ({ title, onPress, disabled, icon, style }) => (
     style={[
       styles.button,
       disabled && styles.buttonDisabled,
-      style, // Aplicando estilos externos
+      style,
     ]}
     onPress={onPress}
     disabled={disabled}
