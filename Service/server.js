@@ -152,12 +152,22 @@ app.post("/balance/deposit", authenticateToken, async (req, res) => {
     const user = await User.findById(req.user.userId);
     user.balance += amount;
     await user.save();
-    res
-      .status(200)
-      .json({
-        message: "Depósito realizado com sucesso",
-        balance: user.balance,
-      });
+
+    const transaction = new Transaction({
+      userId: req.user.userId,
+      symbol: null,
+      assetName: "Depósito",
+      quantity: null,
+      price: amount,
+      transactionType: "DEPOSIT",
+      assetType: "CASH",
+    });
+    await transaction.save();
+
+    res.status(200).json({
+      message: "Depósito realizado com sucesso",
+      balance: user.balance,
+    });
   } catch (error) {
     console.error("❌ Erro ao depositar saldo:", error);
     res.status(500).json({ message: "Erro ao depositar saldo" });
@@ -176,12 +186,22 @@ app.post("/balance/withdraw", authenticateToken, async (req, res) => {
     }
     user.balance -= amount;
     await user.save();
-    res
-      .status(200)
-      .json({
-        message: "Retirada realizada com sucesso",
-        balance: user.balance,
-      });
+
+    const transaction = new Transaction({
+      userId: req.user.userId,
+      symbol: null,
+      assetName: "Retirada",
+      quantity: null,
+      price: amount,
+      transactionType: "WITHDRAW",
+      assetType: "CASH",
+    });
+    await transaction.save();
+
+    res.status(200).json({
+      message: "Retirada realizada com sucesso",
+      balance: user.balance,
+    });
   } catch (error) {
     console.error("❌ Erro ao retirar saldo:", error);
     res.status(500).json({ message: "Erro ao retirar saldo" });
@@ -463,7 +483,7 @@ app.get("/market/stocks", authenticateToken, async (req, res) => {
   }
 });
 
-app.get("/api/stocks/search/:term",authenticateToken, async (req, res) => {
+app.get("/api/stocks/search/:term", authenticateToken, async (req, res) => {
   try {
     const searchTerm = req.params.term.toUpperCase();
 
@@ -515,54 +535,63 @@ app.get("/api/stocks/search/:term",authenticateToken, async (req, res) => {
   }
 });
 
-app.post('/api/favorites', authenticateToken, async (req, res) => {
+app.post("/api/favorites", authenticateToken, async (req, res) => {
   try {
     const { symbol } = req.body;
     const userId = req.user.userId;
 
     const user = await User.findById(userId);
     if (!user) {
-      return res.status(404).json({ message: 'Usuário não encontrado.' });
+      return res.status(404).json({ message: "Usuário não encontrado." });
     }
 
     if (user.favorites.includes(symbol)) {
-      return res.status(400).json({ message: 'Ação já está nos favoritos.' });
+      return res.status(400).json({ message: "Ação já está nos favoritos." });
     }
 
     user.favorites.push(symbol);
     await user.save();
 
-    res.status(200).json({ message: 'Ação adicionada aos favoritos.', favorites: user.favorites });
+    res
+      .status(200)
+      .json({
+        message: "Ação adicionada aos favoritos.",
+        favorites: user.favorites,
+      });
   } catch (error) {
-    console.error('❌ Erro ao adicionar favorito:', error);
-    res.status(500).json({ message: 'Erro ao adicionar favorito.' });
+    console.error("❌ Erro ao adicionar favorito:", error);
+    res.status(500).json({ message: "Erro ao adicionar favorito." });
   }
 });
 
-app.delete('/api/favorites/:symbol', authenticateToken, async (req, res) => {
+app.delete("/api/favorites/:symbol", authenticateToken, async (req, res) => {
   try {
     const { symbol } = req.params;
     const userId = req.user.userId;
 
     const user = await User.findById(userId);
     if (!user) {
-      return res.status(404).json({ message: 'Usuário não encontrado.' });
+      return res.status(404).json({ message: "Usuário não encontrado." });
     }
 
     if (!user.favorites.includes(symbol)) {
-      return res.status(400).json({ message: 'Ação não está nos favoritos.' });
+      return res.status(400).json({ message: "Ação não está nos favoritos." });
     }
 
-    user.favorites = user.favorites.filter(fav => fav !== symbol);
+    user.favorites = user.favorites.filter((fav) => fav !== symbol);
     await user.save();
 
-    res.status(200).json({ message: 'Ação removida dos favoritos.', favorites: user.favorites });
+    res
+      .status(200)
+      .json({
+        message: "Ação removida dos favoritos.",
+        favorites: user.favorites,
+      });
   } catch (error) {
-    console.error('❌ Erro ao remover favorito:', error);
-    res.status(500).json({ message: 'Erro ao remover favorito.' });
+    console.error("❌ Erro ao remover favorito:", error);
+    res.status(500).json({ message: "Erro ao remover favorito." });
   }
 });
-
 
 app.get("/api/favorites", authenticateToken, async (req, res) => {
   try {
@@ -576,7 +605,9 @@ app.get("/api/favorites", authenticateToken, async (req, res) => {
     const favoriteSymbols = user.favorites;
 
     if (favoriteSymbols.length === 0) {
-      return res.status(200).json({ stocks: [], timestamp: new Date().toISOString() });
+      return res
+        .status(200)
+        .json({ stocks: [], timestamp: new Date().toISOString() });
     }
 
     const stocksPromises = favoriteSymbols.map(async (symbol) => {
@@ -611,7 +642,9 @@ app.get("/api/favorites", authenticateToken, async (req, res) => {
       }
     });
 
-    const stocks = (await Promise.all(stocksPromises)).filter(stock => stock !== null);
+    const stocks = (await Promise.all(stocksPromises)).filter(
+      (stock) => stock !== null
+    );
 
     stocks.sort((a, b) => b.changePercent - a.changePercent);
 
@@ -622,6 +655,61 @@ app.get("/api/favorites", authenticateToken, async (req, res) => {
   } catch (error) {
     console.error("❌ Erro ao buscar favoritos:", error);
     res.status(500).json({ message: "Erro ao buscar favoritos" });
+  }
+});
+
+app.get("/api/transactions", authenticateToken, async (req, res) => {
+  try {
+    const transactions = await Transaction.find({
+      userId: req.user.userId,
+    }).sort({ date: -1 });
+
+    res.status(200).json({ transactions });
+  } catch (error) {
+    console.error("❌ Erro ao buscar transações:", error);
+    res.status(500).json({ message: "Erro ao buscar transações" });
+  }
+});
+
+app.get("/api/deposits", authenticateToken, async (req, res) => {
+  try {
+    const deposits = await Transaction.find({
+      userId: req.user.userId,
+      transactionType: "DEPOSIT",
+    }).sort({ date: -1 });
+
+    res.status(200).json({ deposits });
+  } catch (error) {
+    console.error("❌ Erro ao buscar depósitos:", error);
+    res.status(500).json({ message: "Erro ao buscar depósitos" });
+  }
+});
+
+app.get("/api/withdrawals", authenticateToken, async (req, res) => {
+  try {
+    const withdrawals = await Transaction.find({
+      userId: req.user.userId,
+      transactionType: "WITHDRAW",
+    }).sort({ date: -1 });
+
+    res.status(200).json({ withdrawals });
+  } catch (error) {
+    console.error("❌ Erro ao buscar retiradas:", error);
+    res.status(500).json({ message: "Erro ao buscar retiradas" });
+  }
+});
+
+app.get("/api/trades", authenticateToken, async (req, res) => {
+  try {
+    const trades = await Transaction.find({
+      userId: req.user.userId,
+      transactionType: { $in: ["BUY", "SELL"] },
+    }).sort({ date: -1 });
+
+    res.status(200).json({ trades });
+  } catch (error) {
+    console.error("❌ Erro ao buscar negociações:", error);
+    res.status(500).json({ message: "Erro ao buscar negociações" });
   }
 });
 
