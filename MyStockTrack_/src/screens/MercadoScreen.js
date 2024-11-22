@@ -9,6 +9,7 @@ import {
   ActivityIndicator,
   RefreshControl,
   TextInput,
+  Keyboard,
 } from "react-native";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -20,6 +21,7 @@ export default function MercadoScreen() {
   const [stocks, setStocks] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredStocks, setFilteredStocks] = useState([]);
+  const [searchLoading, setSearchLoading] = useState(false);
 
   const fetchStocks = async () => {
     try {
@@ -37,17 +39,42 @@ export default function MercadoScreen() {
     }
   };
 
+  const searchStocks = async (term) => {
+    if (!term) {
+      setFilteredStocks(stocks);
+      return;
+    }
+    try {
+      setSearchLoading(true);
+      const token = await AsyncStorage.getItem("token");
+      const response = await axios.get(`${BACKEND_URL}/api/stocks/search/${term.toUpperCase()}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      // Mapeia os dados da API de pesquisa para o formato esperado
+      const mappedStocks = response.data.map(stock => ({
+        symbol: stock.symbol,
+        companyName: stock.description,
+        logo: stock.company.logo,
+        currentPrice: stock.quote.c,      // Preço atual
+        changePercent: stock.quote.dp,    // Variação percentual
+      }));
+
+      setFilteredStocks(mappedStocks);
+    } catch (error) {
+      console.error("Erro ao pesquisar ações:", error);
+    } finally {
+      setSearchLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchStocks();
   }, []);
 
-  useEffect(() => {
-    const filtered = stocks.filter(stock => 
-      stock.symbol.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      stock.companyName.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-    setFilteredStocks(filtered);
-  }, [searchQuery, stocks]);
+  // useEffect(() => {
+  //   searchStocks(searchQuery);
+  // }, [searchQuery]);
 
   const onRefresh = React.useCallback(() => {
     setRefreshing(true);
@@ -74,7 +101,7 @@ export default function MercadoScreen() {
 
       <View style={styles.priceContainer}>
         <Text style={styles.currentPrice}>
-          ${item.currentPrice.toFixed(2)}
+          ${item.currentPrice !== undefined && item.currentPrice !== null ? item.currentPrice.toFixed(2) : 'N/A'}
         </Text>
         <View
           style={[
@@ -89,12 +116,13 @@ export default function MercadoScreen() {
             style={[
               styles.changeText,
               {
-                color: item.changePercent >= 0 ? "#137333" : "#c5221f",
+                color:
+                  item.changePercent >= 0 ? "#137333" : "#c5221f",
               },
             ]}
           >
             {item.changePercent >= 0 ? "+" : ""}
-            {item.changePercent.toFixed(2)}%
+            {item.changePercent !== undefined && item.changePercent !== null ? item.changePercent.toFixed(2) : '0.00'}%
           </Text>
         </View>
       </View>
@@ -116,9 +144,17 @@ export default function MercadoScreen() {
           style={styles.searchInput}
           placeholder="Pesquisar ações..."
           value={searchQuery}
-          onChangeText={setSearchQuery}
+          onChangeText={(text) => setSearchQuery(text)}
           autoCapitalize="characters"
+          returnKeyType="search"
+          keyboardType="default"
+          clearButtonMode="while-editing"
+          onSubmitEditing={() => {
+            searchStocks(searchQuery);
+            Keyboard.dismiss();
+          }}
         />
+        {searchLoading && <ActivityIndicator size="small" color="#4285F4" />}
       </View>
       <FlatList
         data={filteredStocks}
@@ -220,8 +256,11 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     borderBottomWidth: 1,
     borderBottomColor: "#e0e0e0",
+    flexDirection: "row",
+    alignItems: "center",
   },
   searchInput: {
+    flex: 1,
     backgroundColor: "#f5f5f5",
     padding: 12,
     borderRadius: 8,
