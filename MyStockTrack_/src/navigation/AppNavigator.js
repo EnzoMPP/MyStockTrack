@@ -9,6 +9,8 @@ import FavoritosScreen from "../screens/FavoritosScreen";
 import PerfilScreen from "../screens/PerfilScreen";
 import LoginScreen from "../screens/LoginScreen";
 import { UserContext } from "../context/UserContext";
+import MercadoScreen from "../screens/MercadoScreen";
+
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -37,6 +39,20 @@ function AppTabs() {
             >
               <Image
                 source={require("../../assets/icons/home.png")}
+                style={{ width: size, height: size }}
+              />
+            </View>
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Mercado"
+        component={MercadoScreen}
+        options={{
+          tabBarIcon: ({ color, size, focused }) => (
+            <View style={focused ? styles.iconContainerActive : styles.iconContainer}>
+              <Image
+                source={require("../../assets/icons/market.png")}
                 style={{ width: size, height: size }}
               />
             </View>

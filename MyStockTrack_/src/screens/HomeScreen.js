@@ -12,7 +12,7 @@ import CustomButton from "../components/CustomButton";
 import { MaterialIcons, FontAwesome } from "@expo/vector-icons";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { FINNHUB_API_KEY, BACKEND_URL } from "@env";
+import { BACKEND_URL } from "@env";
 
 const screenWidth = Dimensions.get("window").width;
 
@@ -23,9 +23,7 @@ export default function HomeScreen() {
     currentValue: 0,
     monthlyProfitability: 0,
   });
-
-  const [investmentCategories, setInvestmentCategories] = useState([]);
-  const [stockQuotes, setStockQuotes] = useState({});
+  const [stocksData, setStocksData] = useState([]);
 
   useEffect(() => {
     fetchPortfolioData();
@@ -36,21 +34,20 @@ export default function HomeScreen() {
       setLoading(true);
       const token = await AsyncStorage.getItem("token");
 
-      const portfolioResponse = await axios.get(`${BACKEND_URL}/portfolio`, {
+      const { data } = await axios.get(`${BACKEND_URL}/portfolio`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      const quotes = {};
-      for (const stock of portfolioResponse.data.stocks) {
-        const quoteResponse = await axios.get(
-          `https://finnhub.io/api/v1/quote?symbol=${stock.symbol}&token=${FINNHUB_API_KEY}`
-        );
-        quotes[stock.symbol] = quoteResponse.data;
-      }
+      console.log("Dados brutos do backend:", JSON.stringify(data, null, 2)); // Log detalhado
 
-      setStockQuotes(quotes);
-      updatePortfolioSummary(portfolioResponse.data, quotes);
-      organizeInvestmentCategories(portfolioResponse.data);
+      // Conversão explícita para número usando parseFloat
+      setPortfolioSummary({
+        totalInvested: parseFloat(data.totalInvested) || 0,
+        currentValue: parseFloat(data.currentValue) || 0,
+        monthlyProfitability: parseFloat(data.monthlyProfitability) || 0,
+      });
+
+      organizeStocksData(data);
     } catch (error) {
       console.error("Erro ao buscar dados:", error);
     } finally {
@@ -58,69 +55,51 @@ export default function HomeScreen() {
     }
   };
 
-  const updatePortfolioSummary = (portfolio, quotes) => {
-    let currentValue = 0;
-    let totalInvested = 0;
+  const organizeStocksData = (portfolio) => {
+    if (portfolio.assets && portfolio.assets.length > 0) {
+      const stocks = portfolio.assets
+        .filter((asset) => asset.type === "STOCK")
+        .map((stock) => {
+          const value = parseFloat(stock.currentValue);
+          console.log(`Processando ação ${stock.symbol}: valor = ${value}`); // Log por ação
+          return {
+            symbol: stock.symbol,
+            currentValue: value || 0,
+          };
+        })
+        .sort((a, b) => b.currentValue - a.currentValue);
 
-    portfolio.stocks.forEach((stock) => {
-      const quote = quotes[stock.symbol];
-      if (quote) {
-        currentValue += quote.c * stock.quantity;
-        totalInvested += stock.averagePrice * stock.quantity;
-      }
-    });
-
-    const monthlyProfitability =
-      ((currentValue - totalInvested) / totalInvested) * 100;
-
-    setPortfolioSummary({
-      totalInvested,
-      currentValue,
-      monthlyProfitability,
-    });
-  };
-
-  const organizeInvestmentCategories = (portfolio) => {
-    const categories = [
-      { category: "Ações", amount: 0 },
-      { category: "FIIs", amount: 0 },
-      { category: "Renda Fixa", amount: 0 },
-    ];
-
-    portfolio.stocks.forEach((stock) => {
-      if (stock.type === "STOCK") {
-        categories[0].amount += stock.currentValue;
-      } else if (stock.type === "REIT") {
-        categories[1].amount += stock.currentValue;
-      }
-    });
-
-    portfolio.fixedIncome?.forEach((investment) => {
-      categories[2].amount += investment.currentValue;
-    });
-
-    setInvestmentCategories(categories);
+      console.log("Dados processados das ações:", stocks);
+      setStocksData(stocks);
+    }
   };
 
   const chartData = [
     {
-      x: investmentCategories.map((item) => item.category),
-      y: investmentCategories.map((item) => item.amount),
+      x: stocksData.map((stock) => stock.symbol),
+      y: stocksData.map((stock) => stock.currentValue),
       type: "bar",
       marker: { color: "#4285F4" },
     },
   ];
 
   const chartLayout = {
-    title: "Distribuição de Investimentos",
+    title: "Valor Investido por Ação",
     xaxis: {
-      title: "Categorias",
+      title: "Ações",
       tickangle: -45,
       automargin: true,
     },
-    yaxis: { title: "Valor (R$)" },
+    yaxis: {
+      title: "Valor Investido (R$)",
+      automargin: true,
+      rangemode: "tozero", // Força escala começando do zero
+      type: "linear", // Força escala linear
+    },
     margin: { l: 50, r: 40, t: 60, b: 80 },
     bargap: 0.2,
+    height: 400, // Altura fixa
+    width: screenWidth - 52, // Largura ajustada
   };
 
   if (loading) {
@@ -185,13 +164,17 @@ export default function HomeScreen() {
         </View>
       </View>
 
-      <Text style={styles.subtitle}>Distribuição de Investimentos</Text>
+      <Text style={styles.subtitle}>Distribuição por Ação</Text>
       <View style={styles.chartContainer}>
         <Plotly
           data={chartData}
           layout={chartLayout}
           style={styles.plotlyStyle}
-          config={{ displayModeBar: false, staticPlot: true }}
+          config={{
+            displayModeBar: false,
+            responsive: true,
+          }}
+          useResizeHandler={true}
         />
       </View>
 
@@ -289,12 +272,5 @@ const styles = StyleSheet.create({
     marginTop: 16,
     fontSize: 16,
     color: "#4285F4",
-  },
-
-  positiveValue: {
-    color: "#1e8e3e",
-  },
-  negativeValue: {
-    color: "#d93025",
   },
 });
