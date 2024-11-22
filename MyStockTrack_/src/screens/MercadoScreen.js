@@ -8,16 +8,18 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   RefreshControl,
+  TextInput,
 } from "react-native";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { BACKEND_URL } from "@env";
-import { MaterialIcons } from "@expo/vector-icons";
 
 export default function MercadoScreen() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [stocks, setStocks] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filteredStocks, setFilteredStocks] = useState([]);
 
   const fetchStocks = async () => {
     try {
@@ -26,6 +28,7 @@ export default function MercadoScreen() {
         headers: { Authorization: `Bearer ${token}` },
       });
       setStocks(response.data.stocks);
+      setFilteredStocks(response.data.stocks);
     } catch (error) {
       console.error("Erro ao buscar ações:", error);
     } finally {
@@ -37,6 +40,14 @@ export default function MercadoScreen() {
   useEffect(() => {
     fetchStocks();
   }, []);
+
+  useEffect(() => {
+    const filtered = stocks.filter(stock => 
+      stock.symbol.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      stock.companyName.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+    setFilteredStocks(filtered);
+  }, [searchQuery, stocks]);
 
   const onRefresh = React.useCallback(() => {
     setRefreshing(true);
@@ -59,7 +70,6 @@ export default function MercadoScreen() {
             <Text style={styles.companyName}>{item.companyName}</Text>
           </View>
         </View>
-        <MaterialIcons name="arrow-forward-ios" size={20} color="#666" />
       </View>
 
       <View style={styles.priceContainer}>
@@ -101,8 +111,17 @@ export default function MercadoScreen() {
 
   return (
     <View style={styles.container}>
+      <View style={styles.searchContainer}>
+        <TextInput
+          style={styles.searchInput}
+          placeholder="Pesquisar ações..."
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+          autoCapitalize="characters"
+        />
+      </View>
       <FlatList
-        data={stocks}
+        data={filteredStocks}
         renderItem={renderStockItem}
         keyExtractor={(item) => item.symbol}
         refreshControl={
@@ -196,4 +215,16 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "bold",
   },
+  searchContainer: {
+    padding: 16,
+    backgroundColor: "white",
+    borderBottomWidth: 1,
+    borderBottomColor: "#e0e0e0",
+  },
+  searchInput: {
+    backgroundColor: "#f5f5f5",
+    padding: 12,
+    borderRadius: 8,
+    fontSize: 16,
+  }
 });
