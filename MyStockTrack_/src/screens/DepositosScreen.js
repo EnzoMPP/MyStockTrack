@@ -92,7 +92,7 @@ export default function DepositosScreen() {
     <View style={styles.transactionItem}>
       <View style={styles.transactionInfo}>
         <Text style={styles.transactionType}>{item.transactionType}</Text>
-        <Text style={styles.amount}>Valor: R$ {item.price.toFixed(2)}</Text>
+        <Text style={styles.amount}>Valor: $ {item.price.toFixed(2)}</Text>
         <Text style={styles.date}>Data: {new Date(item.date).toLocaleDateString()}</Text>
       </View>
     </View>

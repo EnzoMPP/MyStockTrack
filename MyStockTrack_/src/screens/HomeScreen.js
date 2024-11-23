@@ -91,7 +91,7 @@ export default function HomeScreen() {
       automargin: true,
     },
     yaxis: {
-      title: "Valor Investido (R$)",
+      title: "Valor Investido ($)",
       automargin: true,
       rangemode: "tozero", 
       type: "linear", 
@@ -119,7 +119,7 @@ export default function HomeScreen() {
         <View style={styles.summaryItem}>
           <Text style={styles.summaryLabel}>Total Investido:</Text>
           <Text style={styles.summaryValue}>
-            R${" "}
+            ${" "}
             {portfolioSummary.totalInvested.toLocaleString("pt-BR", {
               minimumFractionDigits: 2,
             })}
@@ -139,7 +139,7 @@ export default function HomeScreen() {
               },
             ]}
           >
-            R${" "}
+            ${" "}
             {portfolioSummary.currentValue.toLocaleString("pt-BR", {
               minimumFractionDigits: 2,
             })}

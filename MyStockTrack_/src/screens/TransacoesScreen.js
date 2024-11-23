@@ -48,7 +48,7 @@ export default function TradesScreen() {
       <View style={styles.tradeInfo}>
         <Text style={styles.tradeType}>{item.transactionType}</Text>
         <Text style={styles.amount}>Quantidade: {item.quantity}</Text>
-        <Text style={styles.price}>Preço: R$ {item.price.toFixed(2)}</Text>
+        <Text style={styles.price}>Preço: $ {item.price.toFixed(2)}</Text>
         <Text style={styles.date}>Data: {new Date(item.date).toLocaleDateString()}</Text>
       </View>
     </View>

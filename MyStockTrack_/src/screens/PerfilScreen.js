@@ -184,9 +184,9 @@ const PerfilScreen = () => {
       <View style={styles.assetInfo}>
         <Text style={styles.assetSymbol}>{item.symbol}</Text>
         <Text>Quantidade: {item.quantity}</Text>
-        <Text>Preço Médio: R$ {item.averagePrice.toFixed(2)}</Text>
-        <Text>Preço Atual: R$ {item.currentPrice.toFixed(2)}</Text>
-        <Text>Valor Atual: R$ {item.currentValue.toFixed(2)}</Text>
+        <Text>Preço Médio: $ {item.averagePrice.toFixed(2)}</Text>
+        <Text>Preço Atual: $ {item.currentPrice.toFixed(2)}</Text>
+        <Text>Valor Atual: $ {item.currentValue.toFixed(2)}</Text>
         <TextInput
           style={styles.input}
           placeholder="Quantidade a vender"
@@ -237,7 +237,7 @@ const PerfilScreen = () => {
           />
           <Text style={styles.name}>{user.name}</Text>
           <Text style={styles.email}>{user.email}</Text>
-          <Text style={styles.balance}>Saldo: R$ {balance.toFixed(2)}</Text>
+          <Text style={styles.balance}>Saldo: $ {balance.toFixed(2)}</Text>
         </>
       ) : (
         <Text style={styles.errorText}>Usuário não encontrado.</Text>
@@ -248,9 +248,9 @@ const PerfilScreen = () => {
         {portfolio && (
           <>
             <Text>
-              Total Investido: R$ {portfolio.totalInvested.toFixed(2)}
+              Total Investido: $ {portfolio.totalInvested.toFixed(2)}
             </Text>
-            <Text>Valor Atual: R$ {portfolio.currentValue.toFixed(2)}</Text>
+            <Text>Valor Atual: $ {portfolio.currentValue.toFixed(2)}</Text>
             <Text>
               Rentabilidade:{" "}
               <Text

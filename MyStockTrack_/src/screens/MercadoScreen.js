@@ -249,7 +249,7 @@ export default function MercadoScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.balanceContainer}>
-        <Text style={styles.balanceText}>Saldo: R$ {balance.toFixed(2)}</Text>
+        <Text style={styles.balanceText}>Saldo: $ {balance.toFixed(2)}</Text>
       </View>
 
       <View style={styles.searchContainer}>
