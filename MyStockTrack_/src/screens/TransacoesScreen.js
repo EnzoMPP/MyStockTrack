@@ -4,6 +4,7 @@ import {
   Text,
   StyleSheet,
   FlatList,
+  Button,
   Alert,
 } from "react-native";
 import axios from "axios";
@@ -11,16 +12,16 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { BACKEND_URL } from "@env";
 import { UserContext } from "../context/UserContext";
 
-export default function TransacoesScreen() {
+export default function TradesScreen() {
   const { user } = useContext(UserContext);
-  const [transactions, setTransactions] = useState([]);
+  const [trades, setTrades] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchTransactions();
+    fetchTrades();
   }, []);
 
-  const fetchTransactions = async () => {
+  const fetchTrades = async () => {
     try {
       const token = await AsyncStorage.getItem("token");
       if (!token) {
@@ -29,25 +30,26 @@ export default function TransacoesScreen() {
         return;
       }
 
-      const response = await axios.get(`${BACKEND_URL}/api/transactions`, {
+      const response = await axios.get(`${BACKEND_URL}/api/transactions/trades`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setTransactions(response.data.transactions);
+
+      setTrades(response.data.trades);
     } catch (error) {
-      console.error("Erro ao buscar transações:", error);
-      Alert.alert("Erro", "Falha ao buscar transações. Tente novamente mais tarde.");
+      console.error("Erro ao buscar trades:", error);
+      Alert.alert("Erro", "Falha ao buscar negociações. Verifique o console para mais detalhes.");
     } finally {
       setLoading(false);
     }
   };
 
-  const renderItem = ({ item }) => (
-    <View style={styles.transactionItem}>
-      <View style={styles.transactionInfo}>
-        <Text style={styles.symbol}>{item.symbol}</Text>
-        <Text style={styles.transactionType}>{item.transactionType}</Text>
-        <Text style={styles.quantity}>Quantidade: {item.quantity}</Text>
+  const renderTradeItem = ({ item }) => (
+    <View style={styles.tradeItem}>
+      <View style={styles.tradeInfo}>
+        <Text style={styles.tradeType}>{item.transactionType}</Text>
+        <Text style={styles.amount}>Quantidade: {item.quantity}</Text>
         <Text style={styles.price}>Preço: R$ {item.price.toFixed(2)}</Text>
+        <Text style={styles.date}>Data: {new Date(item.date).toLocaleDateString()}</Text>
       </View>
     </View>
   );
@@ -56,14 +58,18 @@ export default function TransacoesScreen() {
     <View style={styles.container}>
       {loading ? (
         <Text>Carregando...</Text>
+      ) : trades.length === 0 ? (
+        <Text>Nenhuma negociação encontrada.</Text>
       ) : (
         <FlatList
-          data={transactions}
+          data={trades}
           keyExtractor={(item) => item._id}
-          renderItem={renderItem}
-          ListEmptyComponent={<Text>Nenhuma transação encontrada.</Text>}
+          renderItem={renderTradeItem}
         />
       )}
+      <View style={styles.buttonContainer}>
+        <Button title="Atualizar" onPress={fetchTrades} />
+      </View>
     </View>
   );
 }
@@ -73,31 +79,31 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 16,
   },
-  transactionItem: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingVertical: 10,
+  tradeItem: {
+    padding: 10,
     borderBottomWidth: 1,
     borderColor: "#eee",
   },
-  transactionInfo: {
+  tradeInfo: {
     flex: 1,
   },
-  symbol: {
+  tradeType: {
     fontSize: 16,
     fontWeight: "bold",
   },
-  transactionType: {
-    fontSize: 14,
-    color: "#666",
-  },
-  quantity: {
+  amount: {
     fontSize: 14,
     color: "#666",
   },
   price: {
     fontSize: 14,
     color: "#666",
+  },
+  date: {
+    fontSize: 14,
+    color: "#666",
+  },
+  buttonContainer: {
+    marginTop: 16,
   },
 });

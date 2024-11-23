@@ -32,7 +32,7 @@ export default function MercadoScreen() {
   const [searchLoading, setSearchLoading] = useState(false);
   const [balance, setBalance] = useState(0);
   const [modalVisible, setModalVisible] = useState(false);
-  const [selectedSymbol, setSelectedSymbol] = useState(null);
+  const [selectedStock, setSelectedStock] = useState(null);
   const [quantity, setQuantity] = useState("");
 
   const { favorites, addFavorite, removeFavorite, fetchFavorites } = useContext(FavoritesContext);
@@ -94,8 +94,8 @@ export default function MercadoScreen() {
     }
   };
 
-  const searchStocks = async (term) => {
-    if (!term) {
+  const searchStocks = async () => {
+    if (!searchQuery) {
       setFilteredStocks(stocks);
       return;
     }
@@ -108,7 +108,7 @@ export default function MercadoScreen() {
         return;
       }
 
-      const response = await axios.get(`${BACKEND_URL}/api/stocks/search/${term.toUpperCase()}`, {
+      const response = await axios.get(`${BACKEND_URL}/market/stocks/search/${searchQuery.toUpperCase()}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -135,8 +135,7 @@ export default function MercadoScreen() {
       return;
     }
 
-    const stock = stocks.find((item) => item.symbol === selectedSymbol);
-    if (!stock) {
+    if (!selectedStock) {
       Alert.alert("Erro", "Ação selecionada não encontrada.");
       return;
     }
@@ -149,12 +148,12 @@ export default function MercadoScreen() {
       }
 
       const response = await axios.post(
-        `${BACKEND_URL}/transactions/buy`,
+        `${BACKEND_URL}/api/transactions/buy`,
         {
-          symbol: selectedSymbol,
-          assetName: stock.companyName,
+          symbol: selectedStock.symbol,
+          assetName: selectedStock.companyName,
           quantity: parseInt(quantity),
-          price: stock.currentPrice,
+          price: selectedStock.currentPrice,
           assetType: "STOCK",
         },
         {
@@ -169,7 +168,7 @@ export default function MercadoScreen() {
       setQuantity("");
       fetchStocks(); 
     } catch (error) {
-      console.error("Erro ao comprar ação:", error);
+      // console.error("Erro ao comprar ação:", error);
       Alert.alert("Erro", error.response?.data?.message || "Falha ao comprar a ação.");
     }
   };
@@ -237,7 +236,7 @@ export default function MercadoScreen() {
         <TouchableOpacity
           style={styles.buyButton}
           onPress={() => {
-            setSelectedSymbol(item.symbol);
+            setSelectedStock(item);
             setModalVisible(true);
           }}
         >
@@ -253,15 +252,17 @@ export default function MercadoScreen() {
         <Text style={styles.balanceText}>Saldo: R$ {balance.toFixed(2)}</Text>
       </View>
 
-      <TextInput
-        style={styles.searchInput}
-        placeholder="Buscar ações..."
-        value={searchQuery}
-        onChangeText={(text) => {
-          setSearchQuery(text);
-          searchStocks(text);
-        }}
-      />
+      <View style={styles.searchContainer}>
+        <TextInput
+          style={styles.searchInput}
+          placeholder="Buscar ações..."
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+          returnKeyType="search"
+          onSubmitEditing={searchStocks}
+          keyboardType="default"
+        />
+      </View>
 
       {loading ? (
         <ActivityIndicator size="large" color="#0000ff" />
@@ -293,7 +294,7 @@ export default function MercadoScreen() {
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>Comprar Ação</Text>
-            <Text style={styles.modalSymbol}>{selectedSymbol}</Text>
+            <Text style={styles.modalSymbol}>{selectedStock?.symbol}</Text>
             <TextInput
               style={styles.input}
               placeholder="Quantidade"
@@ -332,12 +333,17 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
   },
-  searchInput: {
+  searchContainer: {
+    flexDirection: "row",
+    alignItems: "center",
     borderWidth: 1,
     borderColor: "#ccc",
     borderRadius: 8,
-    padding: 8,
     marginBottom: 16,
+  },
+  searchInput: {
+    flex: 1,
+    padding: 8,
   },
   stockItem: {
     flexDirection: "row",

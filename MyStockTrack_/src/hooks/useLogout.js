@@ -37,7 +37,7 @@ export default function useLogout() {
       console.log("🔄 Chamando backend para logout");
       try {
         const response = await axios.post(
-          `${BACKEND_URL}/logout`,
+          `${BACKEND_URL}/auth/logout`,
           {},
           {
             headers: {

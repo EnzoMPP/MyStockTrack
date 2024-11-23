@@ -36,12 +36,12 @@ export default function DepositosScreen() {
         return;
       }
 
-      const responseDeposits = await axios.get(`${BACKEND_URL}/api/deposits`, {
+      const responseDeposits = await axios.get(`${BACKEND_URL}/api/transactions/deposits`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const deposits = responseDeposits.data.deposits;
 
-      const responseWithdrawals = await axios.get(`${BACKEND_URL}/api/withdrawals`, {
+      const responseWithdrawals = await axios.get(`${BACKEND_URL}/api/transactions/withdrawals`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const withdrawals = responseWithdrawals.data.withdrawals;
