@@ -1,4 +1,4 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import {
   View,
   Text,
@@ -13,13 +13,16 @@ import axios from "axios";
 import { BACKEND_URL } from "@env";
 import Icon from "react-native-vector-icons/FontAwesome";
 import { FavoritesContext } from "../context/FavoritesContext";
-import { useFocusEffect } from "@react-navigation/native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function FavoritosScreen() {
-  const { favorites, removeFavorite, fetchFavorites } = useContext(FavoritesContext);
+  const { favorites, removeFavorite } = useContext(FavoritesContext);
   const [favoriteStocks, setFavoriteStocks] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchFavoriteStocks();
+  }, [favorites]);
 
   const fetchFavoriteStocks = async () => {
     try {
@@ -43,12 +46,6 @@ export default function FavoritosScreen() {
       setLoading(false);
     }
   };
-
-  useFocusEffect(
-    React.useCallback(() => {
-      fetchFavoriteStocks();
-    }, [favorites])  
-  );
 
   const handleRemoveFavorite = (symbol) => {
     removeFavorite(symbol);
@@ -81,7 +78,7 @@ export default function FavoritosScreen() {
 
       <View style={styles.priceContainer}>
         <Text style={styles.currentPrice}>
-          ${item.currentPrice !== undefined && item.currentPrice !== null ? item.currentPrice.toFixed(2) : 'N/A'}
+          ${item.currentPrice?.toFixed(2) || 'N/A'}
         </Text>
         <View
           style={[
@@ -102,7 +99,7 @@ export default function FavoritosScreen() {
             ]}
           >
             {item.changePercent >= 0 ? "+" : ""}
-            {item.changePercent !== undefined && item.changePercent !== null ? item.changePercent.toFixed(2) : '0.00'}%
+            {item.changePercent?.toFixed(2) || '0.00'}%
           </Text>
         </View>
       </View>

@@ -1,12 +1,23 @@
+// controllers/transactionController.js
 const User = require('../models/User');
 const Transaction = require('../models/Transaction');
 
 exports.buyStock = async (req, res) => {
   try {
     const { symbol, assetName, quantity, price, assetType } = req.body;
+
+    // Validação de price e quantity
+    if (isNaN(price) || isNaN(quantity) || price < 0 || quantity < 0) {
+      return res.status(400).json({ message: 'Preço ou quantidade inválidos' });
+    }
+
     const totalCost = price * quantity;
 
     const user = await User.findById(req.user.userId);
+    if (!user) {
+      return res.status(404).json({ message: 'Usuário não encontrado' });
+    }
+
     if (user.balance < totalCost) {
       return res.status(400).json({ message: 'Saldo insuficiente para comprar ações' });
     }
@@ -38,6 +49,12 @@ exports.buyStock = async (req, res) => {
 exports.sellStock = async (req, res) => {
   try {
     const { symbol, quantity, price } = req.body;
+
+    // Validação de price e quantity
+    if (isNaN(price) || isNaN(quantity) || price < 0 || quantity < 0) {
+      return res.status(400).json({ message: 'Preço ou quantidade inválidos' });
+    }
+
     const totalProceeds = price * quantity;
 
     const userTransactions = await Transaction.find({
@@ -59,7 +76,19 @@ exports.sellStock = async (req, res) => {
     }
 
     const user = await User.findById(req.user.userId);
+
+    // Verificação da existência do usuário
+    if (!user) {
+      return res.status(404).json({ message: 'Usuário não encontrado' });
+    }
+
     user.balance += totalProceeds;
+
+    // Verificação final do saldo antes de salvar
+    if (isNaN(user.balance)) {
+      return res.status(500).json({ message: 'Erro ao atualizar saldo do usuário' });
+    }
+
     await user.save();
 
     const transaction = new Transaction({
