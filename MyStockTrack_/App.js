@@ -1,4 +1,3 @@
-// App.js
 import React from "react";
 import { BackHandler, Alert, AppState } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";

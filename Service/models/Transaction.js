@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const transactionSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-  symbol: { type: String }, // Aplicável para BUY/SELL
+  symbol: { type: String }, 
   assetName: { type: String },
   quantity: { type: Number },
   price: { type: Number },

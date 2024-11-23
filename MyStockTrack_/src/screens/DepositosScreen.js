@@ -81,7 +81,7 @@ export default function DepositosScreen() {
       Alert.alert("Sucesso", `${transactionType === "DEPOSIT" ? "Depósito" : "Retirada"} realizada com sucesso!`);
       setModalVisible(false);
       setAmount("");
-      fetchTransactions(); // Atualiza a lista de transações após a operação
+      fetchTransactions();
     } catch (error) {
       console.error(`Erro ao realizar ${transactionType === "DEPOSIT" ? "depósito" : "retirada"}:`, error);
       Alert.alert("Erro", error.response?.data?.message || `Falha ao realizar ${transactionType === "DEPOSIT" ? "depósito" : "retirada"}.`);

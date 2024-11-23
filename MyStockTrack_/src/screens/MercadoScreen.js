@@ -19,11 +19,11 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { BACKEND_URL } from "@env";
 import Icon from "react-native-vector-icons/FontAwesome";
 import { FavoritesContext } from "../context/FavoritesContext";
-import { UserContext } from "../context/UserContext"; // Importar o UserContext
+import { UserContext } from "../context/UserContext"; 
 import { useFocusEffect } from "@react-navigation/native";
 
 export default function MercadoScreen() {
-  const { user } = useContext(UserContext); // Obter o usuário do contexto
+  const { user } = useContext(UserContext); 
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [stocks, setStocks] = useState([]);
@@ -167,7 +167,7 @@ export default function MercadoScreen() {
       setBalance(response.data.balance);
       setModalVisible(false);
       setQuantity("");
-      fetchStocks(); // Atualiza a lista de ações após a compra
+      fetchStocks(); 
     } catch (error) {
       console.error("Erro ao comprar ação:", error);
       Alert.alert("Erro", error.response?.data?.message || "Falha ao comprar a ação.");
