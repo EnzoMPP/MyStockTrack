@@ -1,4 +1,4 @@
-
+// FavoritesContext.js
 import React, { createContext, useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage'; 
 import axios from 'axios';
@@ -11,12 +11,10 @@ export const FavoritesProvider = ({ children }) => {
   const [favorites, setFavorites] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  
   const fetchFavorites = async () => {
     try {
       const token = await AsyncStorage.getItem('token');
       if (!token) {
-        Alert.alert('Erro', 'Token de autenticação não encontrado.');
         setLoading(false);
         return;
       }
@@ -39,7 +37,6 @@ export const FavoritesProvider = ({ children }) => {
     fetchFavorites();
   }, []);
 
-  
   const addFavorite = async (symbol) => {
     try {
       const token = await AsyncStorage.getItem('token');
@@ -63,7 +60,6 @@ export const FavoritesProvider = ({ children }) => {
     }
   };
 
-  
   const removeFavorite = async (symbol) => {
     try {
       const token = await AsyncStorage.getItem('token');

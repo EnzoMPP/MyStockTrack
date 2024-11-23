@@ -186,12 +186,6 @@ export default function HomeScreen() {
           icon={<MaterialIcons name="refresh" size={24} color="white" />}
           style={styles.buttonSpacing}
         />
-        <CustomButton
-          title="Comprar ou Vender Ações"
-          onPress={() => {}}
-          icon={<FontAwesome name="exchange" size={24} color="white" />}
-          style={styles.buttonSpacing}
-        />
       </View>
     </ScrollView>
   );
@@ -259,7 +253,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   actionsContainer: {
-    marginTop: 20,
+    marginTop: 0,
     width: "100%",
     alignItems: "center",
   },

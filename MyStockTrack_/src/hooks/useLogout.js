@@ -3,6 +3,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as AuthSession from "expo-auth-session";
 import axios from "axios";
 import { BACKEND_URL } from "@env";
+import { Alert } from "react-native";
 
 export default function useLogout() {
   const navigation = useNavigation();
@@ -16,6 +17,7 @@ export default function useLogout() {
 
       if (!token) {
         console.log("❌ Nenhum token encontrado para revogação");
+        Alert.alert("Logout", "Nenhum token encontrado. Redirecionando para login.");
         navigation.navigate("Login");
         return;
       }
@@ -29,6 +31,7 @@ export default function useLogout() {
         console.log("✅ Token Google revogado com sucesso");
       } catch (revokeError) {
         console.error("❌ Erro ao revogar token Google:", revokeError);
+        Alert.alert("Erro", "Falha ao revogar token no Google.");
       }
 
       console.log("🔄 Chamando backend para logout");
@@ -46,6 +49,7 @@ export default function useLogout() {
         console.log("✅ Resposta do backend:", response.data);
       } catch (backendError) {
         console.error("❌ Erro ao chamar backend para logout:", backendError);
+        Alert.alert("Erro", "Falha ao comunicar com o servidor durante o logout.");
       }
 
       await AsyncStorage.removeItem("token");

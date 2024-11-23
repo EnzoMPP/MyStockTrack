@@ -10,6 +10,7 @@ import PerfilScreen from "../screens/PerfilScreen";
 import LoginScreen from "../screens/LoginScreen";
 import { UserContext } from "../context/UserContext";
 import MercadoScreen from "../screens/MercadoScreen";
+import { FavoritesProvider } from "../context/FavoritesContext";
 
 
 const Tab = createBottomTabNavigator();
@@ -19,6 +20,7 @@ function AppTabs() {
   const { user } = useContext(UserContext);
 
   return (
+    <FavoritesProvider>
     <Tab.Navigator
       screenOptions={{
         headerShown: false,
@@ -152,6 +154,7 @@ function AppTabs() {
         }}
       />
     </Tab.Navigator>
+    </FavoritesProvider>
   );
 }
 

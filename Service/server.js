@@ -143,6 +143,19 @@ app.get("/profile", authenticateToken, async (req, res) => {
   }
 });
 
+app.get("/balance", authenticateToken, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.userId);
+    if (!user) {
+      return res.status(404).json({ message: "Usuário não encontrado" });
+    }
+    res.status(200).json({ balance: user.balance });
+  } catch (error) {
+    console.error("❌ Erro ao buscar saldo:", error);
+    res.status(500).json({ message: "Erro ao buscar saldo" });
+  }
+});
+
 app.post("/balance/deposit", authenticateToken, async (req, res) => {
   try {
     const { amount } = req.body;

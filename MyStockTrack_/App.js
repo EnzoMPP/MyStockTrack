@@ -1,3 +1,4 @@
+// App.js
 import React from "react";
 import { BackHandler, Alert, AppState } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
@@ -6,7 +7,6 @@ import { navigationRef } from "./src/navigation/RootNavigation";
 import useAuth from "./src/hooks/useAuth";
 import { UserProvider } from "./src/context/UserContext";
 import useLogout from "./src/hooks/useLogout";
-import { FavoritesProvider } from './src/context/FavoritesContext';
 
 function AuthHandler({ children }) {
   useAuth();
@@ -40,7 +40,6 @@ function AuthHandler({ children }) {
             {
               text: "Sim",
               onPress: async () => {
-               
                 BackHandler.exitApp();
               },
             },
@@ -63,13 +62,11 @@ function AuthHandler({ children }) {
 export default function App() {
   return (
     <UserProvider>
-      <FavoritesProvider>
-        <NavigationContainer ref={navigationRef}>
-          <AuthHandler>
+      <NavigationContainer ref={navigationRef}>
+        <AuthHandler>
             <AppNavigator />
-          </AuthHandler>
-        </NavigationContainer>
-      </FavoritesProvider>
+        </AuthHandler>
+      </NavigationContainer>
     </UserProvider>
   );
 }
