@@ -1,5 +1,19 @@
 import React, { useEffect, useContext, useState } from "react";
-import { View, Text, StyleSheet, Image, ActivityIndicator, FlatList, TouchableOpacity, Alert, TextInput, Button, Modal } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Image,
+  ActivityIndicator,
+  FlatList,
+  TouchableOpacity,
+  Alert,
+  TextInput,
+  Button,
+  Modal,
+  TouchableWithoutFeedback,
+  Keyboard,
+} from "react-native";
 import useLogout from "../hooks/useLogout";
 import CustomButton from "../components/CustomButton";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -17,6 +31,7 @@ const PerfilScreen = () => {
   const [balance, setBalance] = useState(0);
   const [showAssets, setShowAssets] = useState(false);
   const [quantityToSell, setQuantityToSell] = useState("");
+  const [quantities, setQuantities] = useState({});
 
   useEffect(() => {
     const fetchData = async () => {
@@ -53,12 +68,11 @@ const PerfilScreen = () => {
         Alert.alert("Erro", "Token de autenticação não encontrado.");
         return;
       }
-  
+
       const response = await axios.get(`${BACKEND_URL}/portfolio`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-  
-      console.log("Dados do portfólio:", response.data); // Log para debug
+
       setPortfolio(response.data);
     } catch (error) {
       console.error("Erro ao buscar portfólio:", error);
@@ -88,17 +102,26 @@ const PerfilScreen = () => {
   };
 
   const handleSell = (asset) => {
+    const quantityToSell = quantities[asset.symbol];
+    if (!quantityToSell) {
+      Alert.alert("Erro", "Por favor, insira uma quantidade para vender.");
+      return;
+    }
+
     Alert.alert(
       "Confirmar Venda",
       `Deseja vender ${quantityToSell} ${asset.symbol}?`,
       [
         { text: "Cancelar", style: "cancel" },
-        { text: "Vender", onPress: () => executeSell(asset) },
+        {
+          text: "Vender",
+          onPress: () => executeSell(asset, quantityToSell),
+        },
       ]
     );
   };
 
-  const executeSell = async (asset) => {
+  const executeSell = async (asset, quantity) => {
     try {
       const token = await AsyncStorage.getItem("token");
       if (!token) {
@@ -106,25 +129,53 @@ const PerfilScreen = () => {
         return;
       }
 
-      const quantity = Number(quantityToSell);
-      if (isNaN(quantity) || quantity <= 0 || quantity > asset.quantity) {
+      const quantityNum = Number(quantity);
+      if (
+        isNaN(quantityNum) ||
+        quantityNum <= 0 ||
+        quantityNum > asset.quantity
+      ) {
         Alert.alert("Erro", "Quantidade inválida.");
         return;
       }
 
       const response = await axios.post(
         `${BACKEND_URL}/api/transactions/sell`,
-        { symbol: asset.symbol, quantity, price: asset.currentPrice },
+        {
+          symbol: asset.symbol,
+          quantity: quantityNum,
+          price: asset.currentPrice,
+        },
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
       Alert.alert("Sucesso", "Ação vendida com sucesso!");
+      setQuantities((prev) => ({
+        ...prev,
+        [asset.symbol]: "",
+      }));
       await fetchPortfolio();
       await fetchBalance();
-      setQuantityToSell("");
     } catch (error) {
       console.error("Erro ao vender ação:", error);
-      Alert.alert("Erro", error.response?.data?.message || "Falha ao vender ação.");
+      Alert.alert(
+        "Erro",
+        error.response?.data?.message || "Falha ao vender ação."
+      );
+    }
+  };
+
+  const handleShowAssets = async () => {
+    setLoading(true);
+    try {
+      await fetchPortfolio();
+      await fetchBalance();
+      setShowAssets(true);
+    } catch (error) {
+      console.error("Erro ao atualizar dados:", error);
+      Alert.alert("Erro", "Falha ao atualizar dados do portfólio.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -140,11 +191,19 @@ const PerfilScreen = () => {
           style={styles.input}
           placeholder="Quantidade a vender"
           keyboardType="numeric"
-          value={quantityToSell}
-          onChangeText={setQuantityToSell}
+          value={quantities[item.symbol] || ""}
+          onChangeText={(text) => {
+            setQuantities((prev) => ({
+              ...prev,
+              [item.symbol]: text,
+            }));
+          }}
         />
       </View>
-      <TouchableOpacity style={styles.sellButton} onPress={() => handleSell(item)}>
+      <TouchableOpacity
+        style={styles.sellButton}
+        onPress={() => handleSell(item)}
+      >
         <Text style={styles.sellButtonText}>Vender</Text>
       </TouchableOpacity>
     </View>
@@ -169,7 +228,12 @@ const PerfilScreen = () => {
           <Image
             source={{ uri: `${user.profilePicture}?sz=400` }}
             style={styles.profileImage}
-            onError={(e) => console.error("❌ Erro ao carregar a imagem:", e.nativeEvent.error)}
+            onError={(e) =>
+              console.error(
+                "❌ Erro ao carregar a imagem:",
+                e.nativeEvent.error
+              )
+            }
           />
           <Text style={styles.name}>{user.name}</Text>
           <Text style={styles.email}>{user.email}</Text>
@@ -183,11 +247,18 @@ const PerfilScreen = () => {
         <Text style={styles.portfolioTitle}>Resumo do Portfólio</Text>
         {portfolio && (
           <>
-            <Text>Total Investido: R$ {portfolio.totalInvested.toFixed(2)}</Text>
+            <Text>
+              Total Investido: R$ {portfolio.totalInvested.toFixed(2)}
+            </Text>
             <Text>Valor Atual: R$ {portfolio.currentValue.toFixed(2)}</Text>
             <Text>
               Rentabilidade:{" "}
-              <Text style={{ color: portfolio.monthlyProfitability >= 0 ? "#34A853" : "#EA4335" }}>
+              <Text
+                style={{
+                  color:
+                    portfolio.monthlyProfitability >= 0 ? "#34A853" : "#EA4335",
+                }}
+              >
                 {portfolio.monthlyProfitability.toFixed(2)}%
               </Text>
             </Text>
@@ -195,7 +266,7 @@ const PerfilScreen = () => {
         )}
       </View>
 
-      <Button title="Minhas Ações" onPress={() => setShowAssets(true)} />
+      <Button title="Minhas Ações" onPress={handleShowAssets} />
 
       <Modal
         animationType="slide"
@@ -206,14 +277,20 @@ const PerfilScreen = () => {
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>Ações Compradas</Text>
-            {portfolio && portfolio.assets.length === 0 ? (
-              <Text>Nenhuma ação comprada.</Text>
-            ) : (
+            {loading ? (
+              <ActivityIndicator size="large" color="#4285F4" />
+            ) : portfolio?.assets?.length > 0 ? (
               <FlatList
                 data={portfolio.assets}
                 keyExtractor={(item) => item.symbol}
                 renderItem={renderAssetItem}
+                style={styles.assetsList}
+                keyboardShouldPersistTaps="always"
+                keyboardDismissMode="none"
+                removeClippedSubviews={false}
               />
+            ) : (
+              <Text>Nenhuma ação comprada.</Text>
             )}
             <View style={styles.modalButtonContainer}>
               <Button title="Fechar" onPress={() => setShowAssets(false)} />
@@ -331,7 +408,7 @@ const styles = StyleSheet.create({
   },
   modalContent: {
     width: "90%",
-    maxHeight: "80%", // Limita a altura do modal
+    maxHeight: "80%", 
     backgroundColor: "white",
     borderRadius: 8,
     padding: 20,
@@ -361,7 +438,7 @@ const styles = StyleSheet.create({
   modalButtonContainer: {
     marginTop: 20,
     width: "100%",
-  }
+  },
 });
 
 export default PerfilScreen;
