@@ -53,13 +53,13 @@ const PerfilScreen = () => {
         Alert.alert("Erro", "Token de autenticação não encontrado.");
         return;
       }
-
+  
       const response = await axios.get(`${BACKEND_URL}/portfolio`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-
+  
+      console.log("Dados do portfólio:", response.data); // Log para debug
       setPortfolio(response.data);
-      console.log("Portfólio carregado:", response.data);
     } catch (error) {
       console.error("Erro ao buscar portfólio:", error);
       Alert.alert("Erro", "Falha ao buscar portfólio.");
@@ -331,19 +331,37 @@ const styles = StyleSheet.create({
   },
   modalContent: {
     width: "90%",
+    maxHeight: "80%", // Limita a altura do modal
     backgroundColor: "white",
     borderRadius: 8,
     padding: 20,
-    alignItems: "center",
+  },
+  assetsList: {
+    width: "100%",
+    marginVertical: 10,
   },
   modalTitle: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: "bold",
-    marginBottom: 10,
+    marginBottom: 15,
+    textAlign: "center",
+  },
+  closeButton: {
+    backgroundColor: "#EA4335",
+    padding: 10,
+    borderRadius: 8,
+    width: "100%",
+    alignItems: "center",
+  },
+  closeButtonText: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "bold",
   },
   modalButtonContainer: {
     marginTop: 20,
-  },
+    width: "100%",
+  }
 });
 
 export default PerfilScreen;
