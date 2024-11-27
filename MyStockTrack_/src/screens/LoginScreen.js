@@ -1,21 +1,16 @@
 import React from "react";
-import { StyleSheet, View, Image } from "react-native";
-import { Fontisto } from '@expo/vector-icons';
+import { StyleSheet, View } from "react-native";
 import useAuthRequest from "../hooks/useAuthRequest";
-import CustomButton from "../components/CustomButton";
+import LoginButton from "../components/LoginButton";
+import LogoImage from "../components/LogoImage";
 
 const LoginScreen = () => {
   const { request, promptAsync } = useAuthRequest();
 
   return (
     <View style={styles.container}>
-      <Image
-        source={require("../../assets/images/logo.png")}
-        style={styles.logo}
-      />
-      <CustomButton
-        icon={<Fontisto name="google" size={24} color="white" />}
-        title="Login com Google"
+      <LogoImage />
+      <LoginButton
         onPress={() => promptAsync()}
         disabled={!request}
       />
@@ -29,15 +24,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "#f5f5f5",
-    paddingHorizontal: 20,
-  },
-  logo: {
-    width: 200,
-    height: 200,
-    marginBottom: 40,
-    resizeMode: "contain",
   },
 });
 
 export default LoginScreen;
-

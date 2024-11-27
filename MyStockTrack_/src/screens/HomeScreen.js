@@ -7,14 +7,14 @@ import {
   Dimensions,
   ActivityIndicator,
 } from "react-native";
-import Plotly from "react-native-plotly";
-import CustomButton from "../components/CustomButton";
-import { MaterialIcons, FontAwesome } from "@expo/vector-icons";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { BACKEND_URL } from "@env";
+import PortfolioSummary from "../components/PortfolioSummary";
+import PortfolioChart from "../components/PortfolioChart";
+import QuickActions from "../components/QuickActions";
 
-const screenWidth = Dimensions.get("window").width; 
+const screenWidth = Dimensions.get("window").width;
 
 export default function HomeScreen() {
   const [loading, setLoading] = useState(true);
@@ -38,9 +38,8 @@ export default function HomeScreen() {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      console.log("Dados brutos do backend:", JSON.stringify(data, null, 2)); 
+      console.log("Dados brutos do backend:", JSON.stringify(data, null, 2));
 
-      
       setPortfolioSummary({
         totalInvested: parseFloat(data.totalInvested) || 0,
         currentValue: parseFloat(data.currentValue) || 0,
@@ -61,7 +60,7 @@ export default function HomeScreen() {
         .filter((asset) => asset.type === "STOCK")
         .map((stock) => {
           const value = parseFloat(stock.currentValue);
-          console.log(`Processando ação ${stock.symbol}: valor = ${value}`); 
+          console.log(`Processando ação ${stock.symbol}: valor = ${value}`);
           return {
             symbol: stock.symbol,
             currentValue: value || 0,
@@ -72,34 +71,6 @@ export default function HomeScreen() {
       console.log("Dados processados das ações:", stocks);
       setStocksData(stocks);
     }
-  };
-
-  const chartData = [
-    {
-      x: stocksData.map((stock) => stock.symbol),
-      y: stocksData.map((stock) => stock.currentValue),
-      type: "bar",
-      marker: { color: "#4285F4" },
-    },
-  ];
-
-  const chartLayout = {
-    title: "Valor Investido por Ação",
-    xaxis: {
-      title: "Ações",
-      tickangle: -45,
-      automargin: true,
-    },
-    yaxis: {
-      title: "Valor Investido ($)",
-      automargin: true,
-      rangemode: "tozero", 
-      type: "linear", 
-    },
-    margin: { l: 50, r: 40, t: 60, b: 80 },
-    bargap: 0.2,
-    height: 400, 
-    width: screenWidth - 52, 
   };
 
   if (loading) {
@@ -114,79 +85,13 @@ export default function HomeScreen() {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Resumo do Portfólio</Text>
-
-      <View style={styles.summaryContainer}>
-        <View style={styles.summaryItem}>
-          <Text style={styles.summaryLabel}>Total Investido:</Text>
-          <Text style={styles.summaryValue}>
-            ${" "}
-            {portfolioSummary.totalInvested.toLocaleString("pt-BR", {
-              minimumFractionDigits: 2,
-            })}
-          </Text>
-        </View>
-
-        <View style={styles.summaryItem}>
-          <Text style={styles.summaryLabel}>Valor Atual:</Text>
-          <Text
-            style={[
-              styles.summaryValue,
-              {
-                color:
-                  portfolioSummary.currentValue > portfolioSummary.totalInvested
-                    ? "#1e8e3e"
-                    : "#d93025",
-              },
-            ]}
-          >
-            ${" "}
-            {portfolioSummary.currentValue.toLocaleString("pt-BR", {
-              minimumFractionDigits: 2,
-            })}
-          </Text>
-        </View>
-
-        <View style={styles.summaryItem}>
-          <Text style={styles.summaryLabel}>Rentabilidade:</Text>
-          <Text
-            style={[
-              styles.summaryValue,
-              {
-                color:
-                  portfolioSummary.monthlyProfitability >= 0
-                    ? "#1e8e3e"
-                    : "#d93025",
-              },
-            ]}
-          >
-            {portfolioSummary.monthlyProfitability.toFixed(2)}%
-          </Text>
-        </View>
-      </View>
+      <PortfolioSummary summary={portfolioSummary} />
 
       <Text style={styles.subtitle}>Distribuição por Ação</Text>
-      <View style={styles.chartContainer}>
-        <Plotly
-          data={chartData}
-          layout={chartLayout}
-          style={styles.plotlyStyle}
-          config={{
-            displayModeBar: false,
-            responsive: true,
-          }}
-          useResizeHandler={true}
-        />
-      </View>
+      <PortfolioChart data={stocksData} />
 
       <Text style={styles.subtitle}>Ações Rápidas</Text>
-      <View style={styles.actionsContainer}>
-        <CustomButton
-          title="Atualizar Dados"
-          onPress={fetchPortfolioData}
-          icon={<MaterialIcons name="refresh" size={24} color="white" />}
-          style={styles.buttonSpacing}
-        />
-      </View>
+      <QuickActions onRefresh={fetchPortfolioData} />
     </ScrollView>
   );
 }
@@ -217,50 +122,6 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     color: "#333",
     textAlign: "center",
-  },
-  summaryContainer: {
-    backgroundColor: "#fff",
-    padding: 16,
-    borderRadius: 8,
-    elevation: 2,
-    marginBottom: 20,
-    width: "100%",
-  },
-  summaryItem: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 8,
-  },
-  summaryLabel: {
-    fontSize: 16,
-    color: "#555",
-  },
-  summaryValue: {
-    fontSize: 16,
-    fontWeight: "bold",
-  },
-  chartContainer: {
-    width: screenWidth - 32,
-    height: 400,
-    backgroundColor: "#fff",
-    borderRadius: 8,
-    elevation: 2,
-    padding: 10,
-    marginBottom: 20,
-  },
-  plotlyStyle: {
-    flex: 1,
-    borderRadius: 8,
-  },
-  actionsContainer: {
-    marginTop: 0,
-    width: "100%",
-    alignItems: "center",
-  },
-  buttonSpacing: {
-    marginBottom: 16,
-    width: "100%",
-    maxWidth: 300,
   },
   loadingText: {
     marginTop: 16,

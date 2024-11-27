@@ -78,6 +78,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
+    paddingBottom: 60, // Adiciona espaço para o botão
   },
   tradeItem: {
     padding: 10,
@@ -104,6 +105,11 @@ const styles = StyleSheet.create({
     color: "#666",
   },
   buttonContainer: {
-    marginTop: 16,
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    padding: 16,
+    backgroundColor: '#fff',
   },
 });

@@ -11,11 +11,8 @@ import {
   TextInput,
   Button,
   Modal,
-  TouchableWithoutFeedback,
-  Keyboard,
 } from "react-native";
 import useLogout from "../hooks/useLogout";
-import CustomButton from "../components/CustomButton";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { BACKEND_URL } from "@env";

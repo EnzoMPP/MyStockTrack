@@ -9,7 +9,6 @@ import {
   ActivityIndicator,
   RefreshControl,
   TextInput,
-  Keyboard,
   Alert,
   Modal,
   Button,
@@ -168,6 +167,7 @@ export default function MercadoScreen() {
       setQuantity("");
       fetchStocks(); 
     } catch (error) {
+      // console.error("Erro ao comprar ação:", error);
       Alert.alert("Erro", error.response?.data?.message || "Falha ao comprar a ação.");
     }
   };
@@ -185,10 +185,22 @@ export default function MercadoScreen() {
     return (
       <View style={styles.stockItem}>
         <View style={styles.stockInfo}>
-          <Image
-            source={{ uri: item.logo || "https://via.placeholder.com/50" }}
-            style={styles.logo}
-          />
+          <View style={{ position: 'relative' }}>
+            <Image
+              source={{ uri: item.logo || "https://via.placeholder.com/50" }}
+              style={styles.logo}
+            />
+            <TouchableOpacity
+              onPress={() => toggleFavorite(item.symbol)}
+              style={styles.favoriteIcon}
+            >
+              <Icon
+                name={isFavorite ? "star" : "star-o"}
+                size={24}
+                color={isFavorite ? "#FFD700" : "#ccc"}
+              />
+            </TouchableOpacity>
+          </View>
           <View>
             <Text style={styles.symbol}>{item.symbol}</Text>
             <Text style={styles.companyName} numberOfLines={1} ellipsizeMode="tail">
@@ -196,13 +208,6 @@ export default function MercadoScreen() {
             </Text>
           </View>
         </View>
-        <TouchableOpacity onPress={() => toggleFavorite(item.symbol)}>
-          <Icon
-            name={isFavorite ? "star" : "star-o"}
-            size={24}
-            color={isFavorite ? "#FFD700" : "#ccc"}
-          />
-        </TouchableOpacity>
 
         <View style={styles.priceContainer}>
           <Text style={styles.currentPrice}>
@@ -363,6 +368,11 @@ const styles = StyleSheet.create({
     marginRight: 10,
     borderRadius: 25,
     backgroundColor: "#f0f0f0",
+  },
+  favoriteIcon: {
+    position: 'absolute',
+    top: -10, 
+    right:-80,
   },
   symbol: {
     fontSize: 16,
