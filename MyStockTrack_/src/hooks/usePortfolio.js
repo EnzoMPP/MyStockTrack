@@ -16,7 +16,7 @@ const usePortfolio = () => {
       }
 
       const response = await axios.get(`${BACKEND_URL}/portfolio`, {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${token}` }, 
       });
 
       setPortfolio(response.data);
@@ -29,7 +29,7 @@ const usePortfolio = () => {
 
   useEffect(() => {
     fetchPortfolio();
-  }, []);
+  }, []); 
 
   return { portfolio, loading, fetchPortfolio };
 };
