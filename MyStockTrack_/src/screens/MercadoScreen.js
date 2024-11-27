@@ -167,7 +167,7 @@ export default function MercadoScreen() {
       setQuantity("");
       fetchStocks(); 
     } catch (error) {
-      // console.error("Erro ao comprar ação:", error);
+      
       Alert.alert("Erro", error.response?.data?.message || "Falha ao comprar a ação.");
     }
   };
@@ -371,8 +371,10 @@ const styles = StyleSheet.create({
   },
   favoriteIcon: {
     position: 'absolute',
-    top: -10, 
-    right:-80,
+    top: 15, 
+    // right: 5, 
+    left: 15,
+    borderColor: 'black', 
   },
   symbol: {
     fontSize: 16,
