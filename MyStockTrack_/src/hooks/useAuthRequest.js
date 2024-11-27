@@ -1,7 +1,7 @@
 import * as AuthSession from "expo-auth-session";
 import { BACKEND_URL, GOOGLE_CLIENT_ID } from "@env";
 
-const REDIRECT_URI = AuthSession.makeRedirectUri();
+const REDIRECT_URI = AuthSession.makeRedirectUri(); // Cria a URI de redirecionamento
 
 export default function useAuthRequest() {
   const [request, , promptAsync] = AuthSession.useAuthRequest(
@@ -15,6 +15,5 @@ export default function useAuthRequest() {
       authorizationEndpoint: `${BACKEND_URL}/auth/google`,
     }
   );
-
-  return { request, promptAsync };
+  return { request, promptAsync }; 
 }
