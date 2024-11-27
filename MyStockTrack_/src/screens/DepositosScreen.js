@@ -46,6 +46,7 @@ export default function DepositosScreen() {
       });
       const withdrawals = responseWithdrawals.data.withdrawals;
 
+
       setTransactions([...deposits, ...withdrawals]);
     } catch (error) {
       console.error("Erro ao buscar transações:", error);
