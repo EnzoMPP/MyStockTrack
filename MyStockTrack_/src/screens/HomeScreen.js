@@ -14,14 +14,14 @@ import PortfolioSummary from "../components/HomeScreen/PortfolioSummary";
 import PortfolioChart from "../components/HomeScreen/PortfolioChart";
 import QuickActions from "../components/HomeScreen/QuickActions";
 
-const screenWidth = Dimensions.get("window").width;
+const screenWidth = Dimensions.get("window").width; // pega a largura da tela
 
 export default function HomeScreen() {
   const [loading, setLoading] = useState(true);
   const [portfolioSummary, setPortfolioSummary] = useState({
     totalInvested: 0,
     currentValue: 0,
-    monthlyProfitability: 0,
+    monthlyProfitability: 0, 
   });
   const [stocksData, setStocksData] = useState([]);
 
@@ -54,24 +54,25 @@ export default function HomeScreen() {
     }
   };
 
-  const organizeStocksData = (portfolio) => {
-    if (portfolio.assets && portfolio.assets.length > 0) {
-      const stocks = portfolio.assets
-        .filter((asset) => asset.type === "STOCK")
-        .map((stock) => {
-          const value = parseFloat(stock.currentValue);
-          console.log(`Processando ação ${stock.symbol}: valor = ${value}`);
-          return {
-            symbol: stock.symbol,
-            currentValue: value || 0,
-          };
-        })
-        .sort((a, b) => b.currentValue - a.currentValue);
+const organizeStocksData = (portfolio) => {
+  if (portfolio.assets && portfolio.assets.length > 0) {
+    const stocks = portfolio.assets
+      .filter((asset) => asset.type === "STOCK")
+      .map((stock) => {
+        const value = parseFloat(stock.currentValue); //define float
+        console.log(`Processando ação ${stock.symbol}: valor = ${value}`);
+        return {
+          symbol: stock.symbol,
+          currentValue: value || 0,
+        };
+      })
+      // Tetando Ordenar as ações pelo valor atual em ordem decrescente
+      .sort((a, b) => b.currentValue - a.currentValue);
 
-      console.log("Dados processados das ações:", stocks);
-      setStocksData(stocks);
-    }
-  };
+    console.log("Dados processados das ações:", stocks);
+    setStocksData(stocks);
+  }
+};
 
   if (loading) {
     return (

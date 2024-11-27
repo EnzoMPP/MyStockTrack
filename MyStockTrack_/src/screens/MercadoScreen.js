@@ -29,6 +29,7 @@ export default function MercadoScreen() {
     }, [])
   );
 
+  //gerencia a estrela de favs
   const toggleFavorite = (symbol) => {
     if (favorites.includes(symbol)) {
       removeFavorite(symbol);

@@ -176,14 +176,12 @@ const PerfilScreen = () => {
         <MaterialIcons name="logout" size={24} color="white" />
       </TouchableOpacity>
 
-      {/* Cabeçalho do Perfil */}
       {user ? (
         <ProfileHeader user={user} balance={balance} />
       ) : (
         <Text style={styles.errorText}>Usuário não encontrado.</Text>
       )}
 
-      {/* Resumo do Portfólio */}
       <View style={styles.portfolioContainer}>
         <Text style={styles.portfolioTitle}>Resumo do Portfólio</Text>
         {portfolio && (
@@ -205,7 +203,6 @@ const PerfilScreen = () => {
         )}
       </View>
 
-      {/* Botão para Gerenciar Ações */}
       <View style={styles.buttonContainer}>
         <Button title="Gerenciar Ações" onPress={handleShowAssets} />
       </View>

@@ -25,7 +25,7 @@ export default function FavoritosScreen() {
       }
 
       const response = await axios.get(`${BACKEND_URL}/api/favorites`, {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${token}` }, 
       });
 
       setFavoriteStocks(response.data.stocks);

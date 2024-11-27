@@ -17,18 +17,20 @@ function AuthHandler({ children }) {
       "change",
       async (nextAppState) => {
         if (
+          // Se o aplicativo mudar de ativo para inativo ou em segundo plano, realiza o logout
           appStateRef.current.match(/active/) &&
           nextAppState.match(/inactive|background/)
         ) {
-          await handleLogout();
+          await handleLogout(); 
         }
-        appStateRef.current = nextAppState;
+        appStateRef.current = nextAppState;// Atualiza a referência do estado atual do aplicativo
       }
     );
 
-    const backHandler = BackHandler.addEventListener(
+    const backHandler = BackHandler.addEventListener( // ação para o botão de voltar do android
       "hardwareBackPress",
       () => {
+        // caso não seja a tela de login exibe um alerta para confirmar a saída do aplicativo
         if (navigationRef.getCurrentRoute()?.name !== "Login") {
           Alert.alert("Sair do aplicativo", "Deseja realmente sair?", [
             {
@@ -48,7 +50,7 @@ function AuthHandler({ children }) {
         return false;
       }
     );
-
+// remove o evento quando o componente for desmontado
     return () => {
       subscription.remove();
       backHandler.remove();
@@ -63,7 +65,7 @@ export default function App() {
     <UserProvider>
       <NavigationContainer ref={navigationRef}>
         <AuthHandler>
-            <AppNavigator />
+          <AppNavigator />
         </AuthHandler>
       </NavigationContainer>
     </UserProvider>
