@@ -1,18 +1,8 @@
 import React, { useState, useEffect, useContext } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  FlatList,
-  TouchableOpacity,
-  Alert,
-  Modal,
-  TextInput,
-  Button,
-} from "react-native";
-import axios from "axios";
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { BACKEND_URL } from "@env";
+import { View, Text, Button, Alert, StyleSheet, TouchableOpacity } from "react-native";
+import TransactionService from "../services/TransactionService";
+import TransactionList from "../components/TransactionList";
+import TransactionModal from "../components/TransactionModal";
 import { UserContext } from "../context/UserContext";
 
 export default function DepositosScreen() {
@@ -29,132 +19,69 @@ export default function DepositosScreen() {
 
   const fetchTransactions = async () => {
     try {
-      const token = await AsyncStorage.getItem("token");
-      if (!token) {
-        Alert.alert("Erro", "Token de autenticação não encontrado.");
-        setLoading(false);
-        return;
-      }
-
-      const responseDeposits = await axios.get(`${BACKEND_URL}/api/transactions/deposits`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const deposits = responseDeposits.data.deposits;
-
-      const responseWithdrawals = await axios.get(`${BACKEND_URL}/api/transactions/withdrawals`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const withdrawals = responseWithdrawals.data.withdrawals;
-
-
-      setTransactions([...deposits, ...withdrawals]);
+      const transactions = await TransactionService.fetchTransactions();
+      setTransactions(transactions);
     } catch (error) {
-      console.error("Erro ao buscar transações:", error);
-      Alert.alert("Erro", "Falha ao buscar transações. Tente novamente mais tarde.");
+      Alert.alert("Erro", error.message);
     } finally {
       setLoading(false);
     }
   };
 
   const handleTransaction = async () => {
-    if (!amount || isNaN(amount) || parseFloat(amount) <= 0) {
-      Alert.alert("Erro", "Por favor, insira um valor válido.");
-      return;
-    }
-
     try {
-      const token = await AsyncStorage.getItem("token");
-      if (!token) {
-        Alert.alert("Erro", "Token de autenticação não encontrado.");
-        return;
-      }
-
-      const endpoint = transactionType === "DEPOSIT" ? "/balance/deposit" : "/balance/withdraw";
-      await axios.post(
-        `${BACKEND_URL}${endpoint}`,
-        { amount: parseFloat(amount) },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      await TransactionService.handleTransaction(transactionType, amount);
       Alert.alert("Sucesso", `${transactionType === "DEPOSIT" ? "Depósito" : "Retirada"} realizada com sucesso!`);
       setModalVisible(false);
       setAmount("");
       fetchTransactions();
     } catch (error) {
-      console.error(`Erro ao realizar ${transactionType === "DEPOSIT" ? "depósito" : "retirada"}:`, error);
-      Alert.alert("Erro", error.response?.data?.message || `Falha ao realizar ${transactionType === "DEPOSIT" ? "depósito" : "retirada"}.`);
+      Alert.alert("Erro", error.message);
     }
   };
-
-  const renderItem = ({ item }) => (
-    <View style={styles.transactionItem}>
-      <View style={styles.transactionInfo}>
-        <Text style={styles.transactionType}>{item.transactionType}</Text>
-        <Text style={styles.amount}>Valor: $ {item.price.toFixed(2)}</Text>
-        <Text style={styles.date}>Data: {new Date(item.date).toLocaleDateString()}</Text>
-      </View>
-    </View>
-  );
 
   return (
     <View style={styles.container}>
       {loading ? (
-        <Text>Carregando...</Text>
+        <Text style={styles.loadingText}>Carregando...</Text>
       ) : (
-        <FlatList
-          data={transactions}
-          keyExtractor={(item) => item._id}
-          renderItem={renderItem}
-          ListEmptyComponent={<Text>Nenhuma transação encontrada.</Text>}
-        />
+        <View style={styles.listContainer}>
+          <TransactionList transactions={transactions} />
+        </View>
       )}
 
       <View style={styles.buttonContainer}>
-        <Button title="Depositar" onPress={() => {
-          setTransactionType("DEPOSIT");
-          setModalVisible(true);
-        }} />
-        <Button title="Retirar" onPress={() => {
-          setTransactionType("WITHDRAW");
-          setModalVisible(true);
-        }} />
+        <TouchableOpacity
+          style={[styles.button, styles.depositButton]}
+          onPress={() => {
+            setTransactionType("DEPOSIT");
+            setModalVisible(true);
+          }}
+        >
+          <Text style={styles.buttonText}>Depositar</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.button, styles.withdrawButton]}
+          onPress={() => {
+            setTransactionType("WITHDRAW");
+            setModalVisible(true);
+          }}
+        >
+          <Text style={styles.buttonText}>Retirar</Text>
+        </TouchableOpacity>
       </View>
 
-      <Modal
-        animationType="slide"
-        transparent={true}
+      <TransactionModal
         visible={modalVisible}
-        onRequestClose={() => {
+        transactionType={transactionType}
+        amount={amount}
+        setAmount={setAmount}
+        onCancel={() => {
           setModalVisible(false);
           setAmount("");
         }}
-      >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>{transactionType === "DEPOSIT" ? "Depositar" : "Retirar"} Dinheiro</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Valor"
-              keyboardType="numeric"
-              value={amount}
-              onChangeText={setAmount}
-            />
-            <View style={styles.modalButtons}>
-              <Button
-                title="Cancelar"
-                onPress={() => {
-                  setModalVisible(false);
-                  setAmount("");
-                }}
-              />
-              <Button title={transactionType === "DEPOSIT" ? "Depositar" : "Retirar"} onPress={handleTransaction} />
-            </View>
-          </View>
-        </View>
-      </Modal>
+        onConfirm={handleTransaction}
+      />
     </View>
   );
 }
@@ -162,64 +89,39 @@ export default function DepositosScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
+    padding: 20,
+    backgroundColor: "#f5f5f5",
   },
-  transactionItem: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderColor: "#eee",
+  loadingText: {
+    textAlign: "center",
+    marginVertical: 20,
+    fontSize: 18,
   },
-  transactionInfo: {
+  listContainer: {
     flex: 1,
-  },
-  transactionType: {
-    fontSize: 16,
-    fontWeight: "bold",
-  },
-  amount: {
-    fontSize: 14,
-    color: "#666",
-  },
-  date: {
-    fontSize: 14,
-    color: "#666",
+    marginTop: 20, 
   },
   buttonContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginTop: 16,
+    marginTop: 20,
   },
-  modalContainer: {
+  button: {
     flex: 1,
-    justifyContent: "center",
-    backgroundColor: "rgba(0,0,0,0.5)",
-  },
-  modalContent: {
-    margin: 20,
-    backgroundColor: "white",
+    padding: 15,
     borderRadius: 8,
-    padding: 20,
     alignItems: "center",
+    marginHorizontal: 5,
   },
-  modalTitle: {
-    fontSize: 18,
+  depositButton: {
+    backgroundColor: "#4CAF50",
+  },
+  withdrawButton: {
+    backgroundColor: "#F44336",
+  },
+  buttonText: {
+    color: "#fff",
+    fontSize: 16,
     fontWeight: "bold",
-    marginBottom: 10,
-  },
-  input: {
-    width: "100%",
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 8,
-    padding: 8,
-    marginBottom: 20,
-  },
-  modalButtons: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    width: "100%",
   },
 });

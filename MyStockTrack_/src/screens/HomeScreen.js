@@ -14,7 +14,7 @@ import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { BACKEND_URL } from "@env";
 
-const screenWidth = Dimensions.get("window").width;
+const screenWidth = Dimensions.get("window").width; 
 
 export default function HomeScreen() {
   const [loading, setLoading] = useState(true);

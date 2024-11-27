@@ -168,7 +168,6 @@ export default function MercadoScreen() {
       setQuantity("");
       fetchStocks(); 
     } catch (error) {
-      // console.error("Erro ao comprar ação:", error);
       Alert.alert("Erro", error.response?.data?.message || "Falha ao comprar a ação.");
     }
   };
