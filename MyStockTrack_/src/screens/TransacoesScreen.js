@@ -47,6 +47,7 @@ export default function TradesScreen() {
     <View style={styles.tradeItem}>
       <View style={styles.tradeInfo}>
         <Text style={styles.tradeType}>{item.transactionType}</Text>
+        <Text style={styles.symbol}>Símbolo: {item.symbol}</Text>
         <Text style={styles.amount}>Quantidade: {item.quantity}</Text>
         <Text style={styles.price}>Preço: $ {item.price.toFixed(2)}</Text>
         <Text style={styles.date}>Data: {new Date(item.date).toLocaleDateString()}</Text>
@@ -92,6 +93,10 @@ const styles = StyleSheet.create({
   tradeType: {
     fontSize: 16,
     fontWeight: "bold",
+  },
+  symbol: {
+    fontSize: 14,
+    color: "#666",
   },
   amount: {
     fontSize: 14,
