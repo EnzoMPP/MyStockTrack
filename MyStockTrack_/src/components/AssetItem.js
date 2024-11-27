@@ -3,7 +3,7 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet } from "react-nativ
 
 const AssetItem = ({ asset, sellQuantity, onQuantityChange, onSell }) => {
   const investedValue = asset.quantity * asset.averagePrice;
-
+// Definindo os campos dentro do Modal de Venda de Ações
   return (
     <View style={styles.container}>
       <View style={styles.assetInfo}>
@@ -14,7 +14,7 @@ const AssetItem = ({ asset, sellQuantity, onQuantityChange, onSell }) => {
       <View style={styles.sellContainer}>
         <TextInput
           style={styles.input}
-          placeholder="Qtd a vender"
+          placeholder="Qtd"
           keyboardType="numeric"
           value={sellQuantity}
           onChangeText={onQuantityChange}

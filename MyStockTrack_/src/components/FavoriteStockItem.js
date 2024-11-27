@@ -2,6 +2,7 @@ import React from "react";
 import { View, Text, Image, TouchableOpacity, StyleSheet } from "react-native";
 import Icon from "react-native-vector-icons/FontAwesome";
 
+// Definindo o componente FavoriteStockItem
 export const FavoriteStockItem = ({ item, onRemove }) => (
   <View style={styles.stockItem}>
     <View style={styles.stockInfo}>

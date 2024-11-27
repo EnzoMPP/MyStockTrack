@@ -4,16 +4,19 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from "axios";
 import { BACKEND_URL } from "@env";
 
+// Definindo o Modal de Compra de Ações
 export const BuyModal = ({ visible, stock, onClose, styles, fetchStocks, setBalance }) => {
   const [quantity, setQuantity] = useState("");
 
   const buyStock = async () => {
+    // Verificando se a quantidade é válida
     if (!quantity || isNaN(quantity) || parseInt(quantity) <= 0) {
       Alert.alert("Erro", "Por favor, insira uma quantidade válida.");
       return;
     }
 
     if (!stock) {
+      // Verificando se o Ativo selecionada é válida
       Alert.alert("Erro", "Ação selecionada não encontrada.");
       return;
     }
@@ -26,12 +29,14 @@ export const BuyModal = ({ visible, stock, onClose, styles, fetchStocks, setBala
       }
 
       const response = await axios.post(
+        //consumindo endpoint do back-end de compra de ações
         `${BACKEND_URL}/api/transactions/buy`,
         {
           symbol: stock.symbol,
           assetName: stock.companyName,
           quantity: parseInt(quantity),
           price: stock.currentPrice,
+          // Definindo o tipo de ativo como Ação e apenas Ações
           assetType: "STOCK",
         },
         {
@@ -41,9 +46,12 @@ export const BuyModal = ({ visible, stock, onClose, styles, fetchStocks, setBala
         }
       );
       Alert.alert("Sucesso", "Ação comprada com sucesso!");
+      //Define o saldo do usuário após a compra da ação
       setBalance(response.data.balance);
+      // fecha o modal e reseta a quantidade
       onClose();
       setQuantity("");
+      // atualiza a lista de ações
       fetchStocks();
     } catch (error) {
       Alert.alert("Erro", error.response?.data?.message || "Falha ao comprar a ação.");
@@ -56,6 +64,7 @@ export const BuyModal = ({ visible, stock, onClose, styles, fetchStocks, setBala
       transparent={true}
       visible={visible}
       onRequestClose={() => {
+        // fecha o modal e reseta a quantidade
         onClose();
         setQuantity("");
       }}
@@ -79,6 +88,7 @@ export const BuyModal = ({ visible, stock, onClose, styles, fetchStocks, setBala
                 setQuantity("");
               }}
             />
+            {/* Quando aprtar o botaõ vaio  Comprar as Ações */}
             <Button title="Comprar" onPress={buyStock} />
           </View>
         </View>
