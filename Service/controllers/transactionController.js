@@ -160,7 +160,7 @@ exports.getTrades = async (req, res) => {
       transactionType: { $in: ["BUY", "SELL"] },
     }).sort({ date: -1 });
 
-    res.status(200).json({ trades });
+    res.status(200).json({ trades, symbols: trades.map(trade => trade.symbol) });
   } catch (error) {
     console.error("Erro ao buscar negociações:", error);
     res.status(500).json({ message: "Erro ao buscar negociações" });
