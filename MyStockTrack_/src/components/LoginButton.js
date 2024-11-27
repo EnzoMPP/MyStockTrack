@@ -2,6 +2,7 @@ import React from "react";
 import CustomButton from "../components/CustomButton";
 import { Fontisto } from '@expo/vector-icons';
 
+//botão de fazer logui oAuth
 export default function LoginButton({ onPress, disabled }) {
   return (
     <CustomButton

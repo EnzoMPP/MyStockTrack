@@ -7,6 +7,7 @@ const screenWidth = Dimensions.get("window").width;
 export default function PortfolioChart({ data }) {
   const chartData = [
     {
+      // Define os valores do eixo x e y do gráfico
       x: data.map((stock) => stock.symbol),
       y: data.map((stock) => stock.currentValue),
       type: "bar",
@@ -15,10 +16,11 @@ export default function PortfolioChart({ data }) {
   ];
 
   const chartLayout = {
+    // Define o layout do gráfico
     title: "Valor Investido por Ação",
     xaxis: {
       title: "Ações",
-      tickangle: -45,
+      tickangle: -90,
       automargin: true,
     },
     yaxis: {
@@ -28,7 +30,7 @@ export default function PortfolioChart({ data }) {
       type: "linear",
     },
     margin: { l: 50, r: 40, t: 60, b: 80 },
-    bargap: 0.2,
+    bargap: 0.2, //bargap define o espaço entre as barras do gráfico
     height: 400,
     width: screenWidth - 52,
   };
@@ -36,14 +38,15 @@ export default function PortfolioChart({ data }) {
   return (
     <View style={styles.chartContainer}>
       <Plotly
+      // Renderiza o gráfico Plotly com os dados
         data={chartData}
-        layout={chartLayout}
+        layout={chartLayout} 
         style={styles.plotlyStyle}
         config={{
-          displayModeBar: false,
+          displayModeBar: false, //tira as ações do gráfico deixando ele apenas visível
           responsive: true,
         }}
-        useResizeHandler={true}
+        useResizeHandler={false} //desaabilita o redimensionamento do gráfico
       />
     </View>
   );
