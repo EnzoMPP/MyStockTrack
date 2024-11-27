@@ -3,7 +3,7 @@ import { Modal, View, Text, TextInput, Button, StyleSheet } from "react-native";
 
 export default function TransactionModal({ visible, transactionType, amount, setAmount, onCancel, onConfirm }) {
   return (
-    <Modal
+    <Modal 
       animationType="slide"
       transparent={true}
       visible={visible}
@@ -16,7 +16,7 @@ export default function TransactionModal({ visible, transactionType, amount, set
             style={styles.input}
             placeholder="Valor"
             keyboardType="numeric"
-            value={amount}
+            value={amount} 
             onChangeText={setAmount}
           />
           <View style={styles.modalButtons}>

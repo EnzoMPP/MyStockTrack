@@ -10,9 +10,9 @@ import {
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { BACKEND_URL } from "@env";
-import PortfolioSummary from "../components/PortfolioSummary";
-import PortfolioChart from "../components/PortfolioChart";
-import QuickActions from "../components/QuickActions";
+import PortfolioSummary from "../components/HomeScreen/PortfolioSummary";
+import PortfolioChart from "../components/HomeScreen/PortfolioChart";
+import QuickActions from "../components/HomeScreen/QuickActions";
 
 const screenWidth = Dimensions.get("window").width;
 

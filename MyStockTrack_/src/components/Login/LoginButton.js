@@ -1,5 +1,5 @@
 import React from "react";
-import CustomButton from "../components/CustomButton";
+import CustomButton from "../CustomButton";
 import { Fontisto } from '@expo/vector-icons';
 
 //botão de fazer logui oAuth

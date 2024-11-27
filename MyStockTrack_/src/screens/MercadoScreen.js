@@ -5,9 +5,9 @@ import { useFocusEffect } from "@react-navigation/native";
 import { useStocks } from "../hooks/useStocks";
 import { useBalance } from "../hooks/useBalance";
 import { FavoritesContext } from "../context/FavoritesContext";
-import { SearchBar } from "../components/SearchBar";
-import { StockItem } from "../components/StockItem";
-import { BuyModal } from "../components/BuyModal";
+import { SearchBar } from "../components/MarketScreen/SearchBar";
+import { StockItem } from "../components/MarketScreen/StockItem";
+import { BuyModal } from "../components/MarketScreen/BuyModal";
 
 export default function MercadoScreen() {
   const { favorites, addFavorite, removeFavorite, fetchFavorites } = useContext(FavoritesContext);

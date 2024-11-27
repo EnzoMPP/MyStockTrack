@@ -1,8 +1,8 @@
 import React from "react";
 import { StyleSheet, View } from "react-native";
 import useAuthRequest from "../hooks/useAuthRequest";
-import LoginButton from "../components/LoginButton";
-import LogoImage from "../components/LogoImage";
+import LoginButton from "../components/Login/LoginButton";
+import LogoImage from "../components/Login/LogoImage";
 
 const LoginScreen = () => {
   const { request, promptAsync } = useAuthRequest();

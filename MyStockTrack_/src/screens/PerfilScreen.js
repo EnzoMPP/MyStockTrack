@@ -15,8 +15,8 @@ import axios from "axios";
 import { BACKEND_URL } from "@env";
 import { UserContext } from "../context/UserContext";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import ProfileHeader from "../components/ProfileHeader";
-import SellModal from "../components/SellModal";
+import ProfileHeader from "../components/PerfilScreen/ProfileHeader";
+import SellModal from "../components/PerfilScreen/SellModal";
 
 const PerfilScreen = () => {
   const { handleLogout } = useLogout();

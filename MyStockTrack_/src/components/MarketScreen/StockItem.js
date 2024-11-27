@@ -2,20 +2,21 @@ import React from "react";
 import { View, Text, Image, TouchableOpacity } from "react-native";
 import Icon from "react-native-vector-icons/FontAwesome";
 
-
+//usado para exibir as ações na tela de mercado e de favoritos
 export const StockItem = ({ item, isFavorite, toggleFavorite, onBuyPress, styles }) => (
   <View style={styles.stockItem}>
     <View style={styles.stockInfo}>
       <View style={{ position: 'relative' }}>
         <Image
-          source={{ uri: item.logo || "https://via.placeholder.com/50" }}
+          source={{ uri: item.logo || "https://via.placeholder.com/50"}}
           style={styles.logo}
-        />
+        /> 
         <TouchableOpacity
           onPress={() => toggleFavorite(item.symbol)}
           style={styles.favoriteIcon}
         >
           <Icon
+          // Define o ícone de estrela preenchida quando favoritado e ícone de estrela vazia quando não favoritado
             name={isFavorite ? "star" : "star-o"}
             size={24}
             color={isFavorite ? "#FFD700" : "#ccc"}
@@ -47,10 +48,10 @@ export const StockItem = ({ item, isFavorite, toggleFavorite, onBuyPress, styles
       >
         <Text
           style={{
-            color: item.changePercent >= 0 ? "#34A853" : "#EA4335",
+            color: item.changePercent >= 0 ? "#34A853" : "#EA4335",//define a cor do texto de acordo com a variação percentual
           }}
         >
-          {item.changePercent >= 0 ? "+" : ""}
+          {item.changePercent >= 0 ? "+" : ""/*se a variação for positiva, coloca o sinal de + se não mantém negativo como ja vem do finnhub*/}
           {item.changePercent !== undefined && item.changePercent !== null
             ? `${item.changePercent.toFixed(2)}%`
             : "N/A"}

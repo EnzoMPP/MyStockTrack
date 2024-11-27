@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useContext } from "react";
 import { View, Text, Button, Alert, StyleSheet, TouchableOpacity } from "react-native";
 import TransactionService from "../services/TransactionService";
-import TransactionList from "../components/TransactionList";
-import TransactionModal from "../components/TransactionModal";
+import TransactionList from "../components/DepositosScreen/TransactionList";
+import TransactionModal from "../components/DepositosScreen/TransactionModal";
 import { UserContext } from "../context/UserContext";
 
 export default function DepositosScreen() {

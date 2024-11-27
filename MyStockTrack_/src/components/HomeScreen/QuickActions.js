@@ -1,6 +1,6 @@
 import React from "react";
 import { View, StyleSheet } from "react-native";
-import CustomButton from "../components/CustomButton";
+import CustomButton from "../CustomButton";
 import { MaterialIcons } from "@expo/vector-icons";
 
 export default function QuickActions({ onRefresh }) {

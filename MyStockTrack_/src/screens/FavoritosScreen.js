@@ -4,7 +4,7 @@ import axios from "axios";
 import { BACKEND_URL } from "@env";
 import { FavoritesContext } from "../context/FavoritesContext";
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import FavoriteStockList from "../components/FavoriteStockList";
+import FavoriteStockList from "../components/FavoritesScreen/FavoriteStockList";
 
 export default function FavoritosScreen() {
   const { favorites, removeFavorite } = useContext(FavoritesContext);
