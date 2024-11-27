@@ -2,7 +2,7 @@ import React from "react";
 import { View, Text, Image, TouchableOpacity } from "react-native";
 import Icon from "react-native-vector-icons/FontAwesome";
 
-//Stock
+
 export const StockItem = ({ item, isFavorite, toggleFavorite, onBuyPress, styles }) => (
   <View style={styles.stockItem}>
     <View style={styles.stockInfo}>

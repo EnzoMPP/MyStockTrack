@@ -3,13 +3,14 @@ import { View, Text, StyleSheet } from "react-native";
 
 export default function PortfolioSummary({ summary }) {
   return (
+    // Renderiza o resumo do portfólio
     <View style={styles.summaryContainer}>
       <View style={styles.summaryItem}>
         <Text style={styles.summaryLabel}>Total Investido:</Text>
         <Text style={styles.summaryValue}>
           ${" "}
-          {summary.totalInvested.toLocaleString("pt-BR", {
-            minimumFractionDigits: 2,
+          {summary.totalInvested.toLocaleString("EUA", {//toLocaleString é um método que formata um número de acordo com as opções fornecidas
+            minimumFractionDigits: 2, 
           })}
         </Text>
       </View>
@@ -28,7 +29,7 @@ export default function PortfolioSummary({ summary }) {
           ]}
         >
           ${" "}
-          {summary.currentValue.toLocaleString("pt-BR", {
+          {summary.currentValue.toLocaleString("EUA", {
             minimumFractionDigits: 2,
           })}
         </Text>

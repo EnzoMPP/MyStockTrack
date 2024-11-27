@@ -4,7 +4,7 @@ import { View, TextInput, Text } from "react-native";
 export const SearchBar = ({ balance, searchQuery, setSearchQuery, searchStocks, styles }) => (
   <View>
     <View style={styles.balanceContainer}>
-      <Text style={styles.balanceText}>Saldo: $ {balance.toFixed(2)}</Text>
+      <Text style={styles.balanceText}>Saldo: $ {balance.toFixed(2)}</Text> {/* Exibe o saldo do usuário com duas casas decimais fixas */}
     </View>
     <View style={styles.searchContainer}>
       <TextInput

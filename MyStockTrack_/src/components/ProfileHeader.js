@@ -3,11 +3,12 @@ import { View, Text, Image, StyleSheet } from "react-native";
 
 const ProfileHeader = ({ user, balance }) => {
   return (
+    // Renderiza o cabeçalho do perfil
     <View style={styles.container}>
       <Image
-        source={{ uri: `${user.profilePicture}?sz=400` }}
+        source={{ uri: `${user.profilePicture}?sz=400` }} // Exibe a imagem de perfil do usuário imagem pega da API do Google
         style={styles.profileImage}
-        onError={(e) => console.error("❌ Erro ao carregar a imagem:", e.nativeEvent.error)}
+        onError={(e) => console.error("❌ Erro ao carregar a imagem:", e.nativeEvent.error)} 
       />
       <Text style={styles.name}>{user.name}</Text>
       <Text style={styles.email}>{user.email}</Text>

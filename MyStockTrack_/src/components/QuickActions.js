@@ -9,7 +9,7 @@ export default function QuickActions({ onRefresh }) {
       <CustomButton
         title="Atualizar Dados"
         onPress={onRefresh}
-        icon={<MaterialIcons name="refresh" size={24} color="white" />}
+        icon={<MaterialIcons name="refresh" size={24} color="white" />} //pega o icone do material icons de refresh
         style={styles.buttonSpacing}
       />
     </View>
