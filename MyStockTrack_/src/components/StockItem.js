@@ -1,8 +1,8 @@
 import React from "react";
-import { View, Text, Image, TouchableOpacity, StyleSheet } from "react-native";
+import { View, Text, Image, TouchableOpacity } from "react-native";
 import Icon from "react-native-vector-icons/FontAwesome";
 
-export const FavoriteStockItem = ({ item, onRemove }) => (
+export const StockItem = ({ item, isFavorite, toggleFavorite, onBuyPress, styles }) => (
   <View style={styles.stockItem}>
     <View style={styles.stockInfo}>
       <View style={{ position: 'relative' }}>
@@ -11,13 +11,13 @@ export const FavoriteStockItem = ({ item, onRemove }) => (
           style={styles.logo}
         />
         <TouchableOpacity
-          onPress={() => onRemove(item.symbol)}
+          onPress={() => toggleFavorite(item.symbol)}
           style={styles.favoriteIcon}
         >
           <Icon
-            name="star"
+            name={isFavorite ? "star" : "star-o"}
             size={24}
-            color="#FFD700"
+            color={isFavorite ? "#FFD700" : "#ccc"}
           />
         </TouchableOpacity>
       </View>
@@ -56,55 +56,12 @@ export const FavoriteStockItem = ({ item, onRemove }) => (
         </Text>
       </View>
     </View>
+
+    <TouchableOpacity
+      style={styles.buyButton}
+      onPress={onBuyPress}
+    >
+      <Text style={styles.buyButtonText}>Comprar</Text>
+    </TouchableOpacity>
   </View>
 );
-
-const styles = StyleSheet.create({
-  stockItem: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    padding: 10,
-    borderBottomWidth: 1,
-    borderColor: "#eee",
-  },
-  stockInfo: {
-    flexDirection: "row",
-    alignItems: "center",
-    flex: 1,
-  },
-  logo: {
-    width: 50,
-    height: 50,
-    marginRight: 10,
-  },
-  favoriteIcon: {
-    position: 'absolute',
-    top: 25, 
-    left: 15,
-  },
-  symbol: {
-    fontSize: 16,
-    fontWeight: "bold",
-  },
-  companyName: {
-    fontSize: 14,
-    color: "#666",
-    flexShrink: 1, 
-  },
-  priceContainer: {
-    alignItems: "flex-end",
-    marginBottom: 10, 
-  },
-  currentPrice: {
-    fontSize: 16,
-    fontWeight: "bold",
-  },
-  changeContainer: {
-    paddingVertical: 2,
-    paddingHorizontal: 4,
-    borderRadius: 4,
-    marginTop: 4,
-  },
-});
-
-export default FavoriteStockItem;

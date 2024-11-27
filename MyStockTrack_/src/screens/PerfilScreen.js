@@ -1,16 +1,13 @@
+
 import React, { useEffect, useContext, useState } from "react";
 import {
   View,
   Text,
   StyleSheet,
-  Image,
   ActivityIndicator,
-  FlatList,
   TouchableOpacity,
   Alert,
-  TextInput,
   Button,
-  Modal,
 } from "react-native";
 import useLogout from "../hooks/useLogout";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -18,6 +15,8 @@ import axios from "axios";
 import { BACKEND_URL } from "@env";
 import { UserContext } from "../context/UserContext";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import ProfileHeader from "../components/ProfileHeader";
+import SellModal from "../components/SellModal";
 
 const PerfilScreen = () => {
   const { handleLogout } = useLogout();
@@ -27,7 +26,6 @@ const PerfilScreen = () => {
   const [portfolioLoading, setPortfolioLoading] = useState(true);
   const [balance, setBalance] = useState(0);
   const [showAssets, setShowAssets] = useState(false);
-  const [quantityToSell, setQuantityToSell] = useState("");
   const [quantities, setQuantities] = useState({});
 
   useEffect(() => {
@@ -127,11 +125,7 @@ const PerfilScreen = () => {
       }
 
       const quantityNum = Number(quantity);
-      if (
-        isNaN(quantityNum) ||
-        quantityNum <= 0 ||
-        quantityNum > asset.quantity
-      ) {
+      if (isNaN(quantityNum) || quantityNum <= 0 || quantityNum > asset.quantity) {
         Alert.alert("Erro", "Quantidade inválida.");
         return;
       }
@@ -162,53 +156,13 @@ const PerfilScreen = () => {
     }
   };
 
-  const handleShowAssets = async () => {
-    setLoading(true);
-    try {
-      await fetchPortfolio();
-      await fetchBalance();
-      setShowAssets(true);
-    } catch (error) {
-      console.error("Erro ao atualizar dados:", error);
-      Alert.alert("Erro", "Falha ao atualizar dados do portfólio.");
-    } finally {
-      setLoading(false);
-    }
+  const handleShowAssets = () => {
+    setShowAssets(true);
   };
-
-  const renderAssetItem = ({ item }) => (
-    <View style={styles.assetItem}>
-      <View style={styles.assetInfo}>
-        <Text style={styles.assetSymbol}>{item.symbol}</Text>
-        <Text>Quantidade: {item.quantity}</Text>
-        <Text>Preço Médio: $ {item.averagePrice.toFixed(2)}</Text>
-        <Text>Preço Atual: $ {item.currentPrice.toFixed(2)}</Text>
-        <Text>Valor Atual: $ {item.currentValue.toFixed(2)}</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Quantidade a vender"
-          keyboardType="numeric"
-          value={quantities[item.symbol] || ""}
-          onChangeText={(text) => {
-            setQuantities((prev) => ({
-              ...prev,
-              [item.symbol]: text,
-            }));
-          }}
-        />
-      </View>
-      <TouchableOpacity
-        style={styles.sellButton}
-        onPress={() => handleSell(item)}
-      >
-        <Text style={styles.sellButtonText}>Vender</Text>
-      </TouchableOpacity>
-    </View>
-  );
 
   if (loading || portfolioLoading) {
     return (
-      <View style={styles.container}>
+      <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#4285F4" />
         <Text style={styles.loadingText}>Carregando perfil...</Text>
       </View>
@@ -217,36 +171,24 @@ const PerfilScreen = () => {
 
   return (
     <View style={styles.container}>
+      {/* Botão de Logout */}
       <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
         <MaterialIcons name="logout" size={24} color="white" />
       </TouchableOpacity>
+
+      {/* Cabeçalho do Perfil */}
       {user ? (
-        <>
-          <Image
-            source={{ uri: `${user.profilePicture}?sz=400` }}
-            style={styles.profileImage}
-            onError={(e) =>
-              console.error(
-                "❌ Erro ao carregar a imagem:",
-                e.nativeEvent.error
-              )
-            }
-          />
-          <Text style={styles.name}>{user.name}</Text>
-          <Text style={styles.email}>{user.email}</Text>
-          <Text style={styles.balance}>Saldo: $ {balance.toFixed(2)}</Text>
-        </>
+        <ProfileHeader user={user} balance={balance} />
       ) : (
         <Text style={styles.errorText}>Usuário não encontrado.</Text>
       )}
 
+      {/* Resumo do Portfólio */}
       <View style={styles.portfolioContainer}>
         <Text style={styles.portfolioTitle}>Resumo do Portfólio</Text>
         {portfolio && (
           <>
-            <Text>
-              Total Investido: $ {portfolio.totalInvested.toFixed(2)}
-            </Text>
+            <Text>Total Investido: $ {portfolio.totalInvested.toFixed(2)}</Text>
             <Text>Valor Atual: $ {portfolio.currentValue.toFixed(2)}</Text>
             <Text>
               Rentabilidade:{" "}
@@ -263,38 +205,20 @@ const PerfilScreen = () => {
         )}
       </View>
 
-      <Button title="Minhas Ações" onPress={handleShowAssets} />
+      {/* Botão para Gerenciar Ações */}
+      <View style={styles.buttonContainer}>
+        <Button title="Gerenciar Ações" onPress={handleShowAssets} />
+      </View>
 
-      <Modal
-        animationType="slide"
-        transparent={true}
+      {/* Modal de Gerenciamento de Ações */}
+      <SellModal
         visible={showAssets}
-        onRequestClose={() => setShowAssets(false)}
-      >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Ações Compradas</Text>
-            {loading ? (
-              <ActivityIndicator size="large" color="#4285F4" />
-            ) : portfolio?.assets?.length > 0 ? (
-              <FlatList
-                data={portfolio.assets}
-                keyExtractor={(item) => item.symbol}
-                renderItem={renderAssetItem}
-                style={styles.assetsList}
-                keyboardShouldPersistTaps="always"
-                keyboardDismissMode="none"
-                removeClippedSubviews={false}
-              />
-            ) : (
-              <Text>Nenhuma ação comprada.</Text>
-            )}
-            <View style={styles.modalButtonContainer}>
-              <Button title="Fechar" onPress={() => setShowAssets(false)} />
-            </View>
-          </View>
-        </View>
-      </Modal>
+        onClose={() => setShowAssets(false)}
+        assets={portfolio?.assets}
+        quantities={quantities}
+        setQuantities={setQuantities}
+        handleSell={handleSell}
+      />
     </View>
   );
 };
@@ -302,31 +226,17 @@ const PerfilScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
     paddingHorizontal: 20,
     backgroundColor: "#f5f5f5",
+    paddingTop: 60,
+    alignItems: "center",
+    justifyContent: "center", 
   },
-  profileImage: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    marginBottom: 20,
-  },
-  name: {
-    fontSize: 24,
-    marginBottom: 10,
-    fontWeight: "bold",
-  },
-  email: {
-    fontSize: 18,
-    color: "#666",
-    marginBottom: 10,
-  },
-  balance: {
-    fontSize: 18,
-    color: "#333",
-    marginBottom: 20,
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#f5f5f5",
   },
   loadingText: {
     marginTop: 10,
@@ -339,55 +249,23 @@ const styles = StyleSheet.create({
     marginBottom: 30,
   },
   portfolioContainer: {
-    width: "100%",
+    width: "80%", 
     marginBottom: 20,
-    paddingHorizontal: 20,
+    padding: 20,
+    backgroundColor: "#fff",
+    borderRadius: 8,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+    alignItems: "center", 
   },
   portfolioTitle: {
     fontSize: 20,
     fontWeight: "bold",
     marginBottom: 10,
-  },
-  assetsTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginTop: 20,
-    marginBottom: 10,
-  },
-  assetItem: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    padding: 10,
-    borderBottomWidth: 1,
-    borderColor: "#eee",
-    marginBottom: 10,
-  },
-  assetInfo: {
-    flex: 1,
-  },
-  assetSymbol: {
-    fontSize: 16,
-    fontWeight: "bold",
-    marginBottom: 5,
-  },
-  input: {
-    width: "100%",
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 8,
-    padding: 8,
-    marginTop: 10,
-  },
-  sellButton: {
-    backgroundColor: "#EA4335",
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    borderRadius: 4,
-  },
-  sellButtonText: {
-    color: "#fff",
-    fontWeight: "bold",
+    textAlign: "center",
   },
   logoutButton: {
     position: "absolute",
@@ -397,44 +275,9 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 20,
   },
-  modalContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(0,0,0,0.5)",
-  },
-  modalContent: {
-    width: "90%",
-    maxHeight: "80%", 
-    backgroundColor: "white",
-    borderRadius: 8,
-    padding: 20,
-  },
-  assetsList: {
-    width: "100%",
-    marginVertical: 10,
-  },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    marginBottom: 15,
-    textAlign: "center",
-  },
-  closeButton: {
-    backgroundColor: "#EA4335",
-    padding: 10,
-    borderRadius: 8,
-    width: "100%",
-    alignItems: "center",
-  },
-  closeButtonText: {
-    color: "white",
-    fontSize: 16,
-    fontWeight: "bold",
-  },
-  modalButtonContainer: {
-    marginTop: 20,
-    width: "100%",
+  buttonContainer: {
+    width: "80%", 
+    marginBottom: 20,
   },
 });
 

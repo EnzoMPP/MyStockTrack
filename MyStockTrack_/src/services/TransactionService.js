@@ -55,7 +55,7 @@ class TransactionService {
       );
     } catch (error) {
       
-      // console.log("Erro na transação:", error.response);
+      //console.log("Erro na transação:", error.response);
 
       if (
         error.response &&

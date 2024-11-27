@@ -1,5 +1,5 @@
 import React from "react";
-import { FlatList, StyleSheet, View, Text } from "react-native";
+import { FlatList, Text, View, StyleSheet } from "react-native";
 import FavoriteStockItem from "./FavoriteStockItem";
 
 export default function FavoriteStockList({ stocks, onRemove }) {
@@ -24,9 +24,6 @@ export default function FavoriteStockList({ stocks, onRemove }) {
 }
 
 const styles = StyleSheet.create({
-  listContainer: {
-    padding: 16,
-  },
   emptyContainer: {
     flex: 1,
     justifyContent: "center",
@@ -34,6 +31,9 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 18,
-    color: "#666",
+    color: "#999",
+  },
+  listContainer: {
+    padding: 10,
   },
 });

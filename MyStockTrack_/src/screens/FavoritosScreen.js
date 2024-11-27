@@ -39,6 +39,7 @@ export default function FavoritosScreen() {
   };
 
   const handleRemoveFavorite = (symbol) => {
+    setFavoriteStocks((prevStocks) => prevStocks.filter(stock => stock.symbol !== symbol));
     removeFavorite(symbol);
   };
 
