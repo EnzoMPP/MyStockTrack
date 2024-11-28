@@ -3,7 +3,7 @@ import { View, Text, FlatList, StyleSheet, Button, Modal } from "react-native";
 import AssetItem from "./AssetItem";
 
 const SellModal = ({
-  // parametros do modal de venda de ações
+  // parâmetros do modal de venda de ações
   visible,
   onClose,
   assets,
@@ -13,7 +13,7 @@ const SellModal = ({
 }) => {
   const renderItem = ({ item }) => (
     <AssetItem
-    // Renderiza o componente AssetItem para cada ação comprada
+      // Renderiza o componente AssetItem para cada ação comprada
       asset={item}
       sellQuantity={quantities[item.symbol] || ""}
       onQuantityChange={(quantity) => {
@@ -35,13 +35,13 @@ const SellModal = ({
           <Text style={styles.modalTitle}>Ações Compradas</Text>
           {assets?.length > 0 ? (
             <FlatList
-              data={assets} //data recebe a lista de ações compradas
+              data={assets} // data recebe a lista de ações compradas
               keyExtractor={(item) => item.symbol} // Define a chave de cada item que é o símbolo da ação (symbol)
-              renderItem={renderItem} 
+              renderItem={renderItem}
               style={styles.assetsList}
               keyboardShouldPersistTaps="always" // Mantém o teclado aberto ao clicar em um item
               keyboardDismissMode="none" // Não fecha o teclado ao arrastar a lista PARA CIMA
-              removeClippedSubviews={false} // Evita que a lista some  ao abrir o teclado
+              removeClippedSubviews={false} // Evita que a lista some ao abrir o teclado
             />
           ) : (
             <Text style={styles.emptyText}>Nenhuma ação comprada.</Text> // Mensagem exibida quando não há ações compradas ainda
@@ -64,7 +64,7 @@ const styles = StyleSheet.create({
   },
   modalContent: {
     width: "90%",
-    maxHeight: "80%",
+    maxHeight: "80%", // Limita a altura máxima do conteúdo do modal
     backgroundColor: "white",
     borderRadius: 8,
     padding: 20,
@@ -76,8 +76,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   assetsList: {
-    width: "100%",
-    marginVertical: 10,
+    maxHeight: 300, 
   },
   modalButtonContainer: {
     marginTop: 20,
