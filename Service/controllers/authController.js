@@ -1,8 +1,8 @@
 const { OAuth2Client } = require('google-auth-library');
 const User = require('../models/User');
 const { generateToken } = require('../utils/jwtUtil');
-
 const GOOGLE_REDIRECT_URI = process.env.GOOGLE_REDIRECT_URI;
+const ip = require('ip');
 
 exports.googleAuth = (req, res) => {
   const oauth2Client = new OAuth2Client(
@@ -63,7 +63,10 @@ exports.googleAuthCallback = async (req, res) => {
     const jwtToken = generateToken(user);
     console.log('✅ JWT gerado');
 
-    const redirectUrl = `${process.env.IP_MOBILE}?token=${jwtToken}`;
+    // Captura o IP do cliente e garante que seja IPv4
+    let clientIp = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+    clientIp = ip.address(); // Garante que o IP seja IPv4
+    const redirectUrl = `exp://${clientIp}:8081?token=${jwtToken}`;
     console.log('🔄 Redirecionando para:', redirectUrl);
     res.redirect(redirectUrl);
   } catch (error) {
